@@ -17,7 +17,7 @@ import SideBars from "../../component/SideNav"
 
 const actions = [
     { name: 'selectAll', icon: faCheckDouble, bg: 'success' },
-    { name: 'delete', icon: faTrash, bg: 'danger' },
+    { name: 'deleteee', icon: faTrash, bg: 'danger' },
 
 ]
 const Users = [
