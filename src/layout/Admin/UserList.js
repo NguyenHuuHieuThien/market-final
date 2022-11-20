@@ -2,20 +2,13 @@ import {
     MDBInputGroup,
     MDBBtn,
     MDBBadge,
-    MDBIcon,
-    MDBTable, MDBTableHead, MDBTableBody
 } from 'mdb-react-ui-kit';
-import { Row, Col, Button, Form  } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table';
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash,faArrowsRotate, faCheckDouble,faChevronRight, faTrashCan,faHome, faList, faCheck,faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash,faArrowsRotate,faChevronRight, faTrashCan,faHome, faList, faCheck,faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { Link } from 'react-router-dom';
-
-
-
 import ModalReact from "../../component/Modal";
-import SideBars from "../../component/SideNav"
 import axios from 'axios';
 
 const actions = [
@@ -25,49 +18,49 @@ const actions = [
     { name: 'Thùng rác', icon: faTrashCan, bg: 'info' },
 
 ]
-const Users = [
-    {
-        id: 1,
-        name: 'thiennhh',
-        avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
-        email: 'nguyenthienn3347@gmail.com',
-        phone: '0123456789',
-        address: 'Hanoi',
-        role: 'admin',
-        badge: 'success'
-    },
-    {
-        id: 2,
-        name: 'anhdd',
-        avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
-        email: 'ducanh81@gmail.com',
-        phone: '0123456789',
-        address: 'Gia Lai',
-        role: 'user',
-        badge: 'warning'
-    },
-    {
-        id: 3,
-        name: 'namnc',
-        avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
-        email: 'congnam43@gmail.com',
-        phone: '0123456789',
-        address: 'Đà Nẵng',
-        role: 'user',
-        badge: 'warning'
-    },
-    {
-        id: 4,
-        name: 'chiennd',
-        avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
-        email: 'dangchien43@gmail.com',
-        phone: '0123456789',
-        address: 'Đà Nẵng',
-        role: 'user',
-        badge: 'warning'
-    },
+// const Users = [
+//     {
+//         id: 1,
+//         name: 'thiennhh',
+//         avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
+//         email: 'nguyenthienn3347@gmail.com',
+//         phone: '0123456789',
+//         address: 'Hanoi',
+//         role: 'admin',
+//         badge: 'success'
+//     },
+//     {
+//         id: 2,
+//         name: 'anhdd',
+//         avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
+//         email: 'ducanh81@gmail.com',
+//         phone: '0123456789',
+//         address: 'Gia Lai',
+//         role: 'user',
+//         badge: 'warning'
+//     },
+//     {
+//         id: 3,
+//         name: 'namnc',
+//         avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
+//         email: 'congnam43@gmail.com',
+//         phone: '0123456789',
+//         address: 'Đà Nẵng',
+//         role: 'user',
+//         badge: 'warning'
+//     },
+//     {
+//         id: 4,
+//         name: 'chiennd',
+//         avt: 'https://znews-photo.zingcdn.me/w660/Uploaded/kbd_pilk/2021_06_27/hua_khai5.jpg',
+//         email: 'dangchien43@gmail.com',
+//         phone: '0123456789',
+//         address: 'Đà Nẵng',
+//         role: 'user',
+//         badge: 'warning'
+//     },
 
-]
+// ]
 const profileMenu = [
     { name: 'Trang chủ', link: '/', icon: faHome },
     { name: 'Danh sách người dùng', link: '/admin/users', icon: faList },
@@ -77,37 +70,23 @@ const profileMenu = [
  
 export default function UserList() {
     const [show, setShow] = useState(false);
-    const [users, setUsers] = useState(Users);
+    // const [users, setUsers] = useState(Users);
     const handleClose = () => setShow(false);
     const [userid, setUserId] = useState();
-    const [ischecked, setIsChecked] = useState(false);
     const [searchData, setSearchData] = useState("");
     const handleShow = (id) => {
         setShow(true);
         setUserId(id)
     }
-    console.log(userid);
     const [data, setData] = useState([]);
     useEffect(() => {
         axios.get('http://localhost:8080/user/user-full')
-            .then(res => {
-                setData(res.data);
-            })
+            .then(res =>setData(res.data))
             .catch(err => {
                 console.log(err);
             })
-    }, [users])
+    }, [data])
     console.log(data);
-    const selectAll = () => {
-        setIsChecked(!ischecked);
-        users.map((user) => {
-            user.isChecked = ischecked;
-        })
-    }
-const checkId = (id) => {
-    let a =[...id]
-    console.log(a);
-}
     const deleteUser = () => {
         axios.delete(`http://localhost:8080/user/delete/${userid}`)
             .then(res => {
@@ -188,13 +167,13 @@ const checkId = (id) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.length > 0 ? users.map((user, index) => (
+                                {data.length > 0 ? data.map((user, index) => (
                                     <tr key={index}>
                                         <td>{index + 1}</td>
-                                        <td className='col-1'><img style={{ width: '50px', height: '50px', borderRadius: '50%' }} src={user.avt} /></td>
-                                        <td>{user.name}</td>
+                                        <td className='col-1'><img style={{ width: '50px', height: '50px', borderRadius: '50%' }} src={user.image} /></td>
+                                        <td>{user.username}</td>
                                         <td>{user.email}</td>
-                                        <td>{user.phone}</td>
+                                        <td>{user.phoneNumber}</td>
                                         <td>{user.address}</td>
                                         <td>
                                             <MDBBadge color={user.badge} pill>

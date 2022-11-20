@@ -1,8 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Link } from "react-router-dom";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBars,
   faHome,
   faUser,
   faBagShopping,
@@ -10,9 +9,9 @@ import {
   faArrowRightToBracket,
   faCartShopping,
   faPenToSquare,
-  faSearch,
-  faEdit,
   faUserPlus,
+  faClipboardList,
+  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
@@ -21,8 +20,12 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { useEffect, useState } from "react";
 import Tippy from "@tippyjs/react/headless";
 import "tippy.js/dist/tippy.css"; // optional
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 export default function Navbars() {
+  const token = localStorage.getItem("token");
   const isUser = false;
+  const navigation = useNavigate();
   const menu = {
     menu1: [
       {
@@ -32,7 +35,7 @@ export default function Navbars() {
       },
       {
         name: "Sản phẩm",
-        link: "/products",
+        link: "/product/list",
         icon: faBagShopping,
       },
       {
@@ -59,57 +62,147 @@ export default function Navbars() {
       },
     ],
   };
-
-  // {
-  //     name: "Quản Lý",
-  //     icon: faBars,
-  //     more: [
-  //         {
-  //             name: "Bài viết",
-  //             link: "/",
-  //             icon: faUser
-
-  //         },
-
-  //         {
-  //             name: "Đăng tin",
-  //             link: "/",
-  //             icon: faEdit
-
-  //         },
-  //     ]
-
-  // },
-  const [offset, setOffset] = useState(0);
-  const [bg, setBg] = useState("bg-transparent");
-
-  useEffect(() => {
-    const onScroll = () => setOffset(window.pageYOffset);
-
-    // clean up code
-    window.removeEventListener("scroll", onScroll);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const logout = () => {
+    localStorage.clear();
+    navigation(["/login"]);
+  };
+  const userMenu = [
+    {
+      name: "Trang cá nhân",
+      icon: faUser,
+      link: "/user/profile",
+    },
+    {
+      name: "Đăng bài",
+      icon: faPenToSquare,
+      link: "/product/add",
+    },
+    {
+      name: "Bài viết đã đăng",
+      icon: faClipboardList,
+      link: "/user/poster",
+    },
+    {
+      name: "Đăng xuất",
+      icon: faRightFromBracket,
+      function: function () {
+        localStorage.clear();
+      },
+    },
+  ];
 
   return (
     <div>
-      <div
-        className='bg-nav'
-        id="navbar-bg"
-      >
-          <Navbar collapseOnSelect expand="lg" variant="dark">
-            <Container>
-              <Link to="/">
-                <img
-                  className="w-75 navbar-brand"
-                  src="https://static.chotot.com/storage/marketplace/transparent_logo.png"
-                />
-              </Link>
-              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-              <Navbar.Collapse id="responsive-navbar-nav">
-                <Nav className="me-auto">
-                  {menu.menu1.map((item, index) => (
+      <div className="bg-nav" id="navbar-bg">
+        <Navbar collapseOnSelect expand="lg" variant="dark">
+          <Container>
+            <Link to="/">
+              <img
+                className="w-75 navbar-brand"
+                src="https://static.chotot.com/storage/marketplace/transparent_logo.png"
+              />
+            </Link>
+            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+            <Navbar.Collapse id="responsive-navbar-nav">
+              <Nav className="me-auto">
+                {menu.menu1.map((item, index) =>
+                  item.name === "Thông báo" ? (
+                    <Tippy
+                      interactive
+                      placement="bottom"
+                      render={(attrs) => (
+                        <div
+                          className="box bg-white py-2 sticky-top shadow-sm rounded-2"
+                          style={{ width: "350px" }}
+                          tabIndex="-1"
+                          {...attrs}
+                        >
+                          <ul className="p-0 text-start">
+                            <li role="button" className="mb-2 hover px-3 py-1">
+                              <div className="d-flex align-items-center justify-content-between">
+                                <div className="me-2">
+                                  <img
+                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
+                                    width="60px"
+                                    height="60px"
+                                    className="rounded-5"
+                                  />
+                                </div>
+                                <div>
+                                  <span
+                                    className="fw-bold me-1"
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    Hiếu Thiên
+                                  </span>
+                                  <span style={{ fontSize: "14px" }}>
+                                    Đã bình luận về bài viết của bạn trên hệ
+                                    thống
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                            <li role="button" className="mb-2 hover px-3 py-1">
+                              <div className="d-flex align-items-center justify-content-between">
+                                <div className="me-2">
+                                  <img
+                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
+                                    width="60px"
+                                    height="60px"
+                                    className="rounded-5"
+                                  />
+                                </div>
+                                <div>
+                                  <span
+                                    className="fw-bold me-1"
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    Hiếu Thiên
+                                  </span>
+                                  <span style={{ fontSize: "14px" }}>
+                                    Đã bình luận về bài viết của bạn trên hệ
+                                    thống
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                            <li role="button" className="hover px-3 py-1">
+                              <div className="d-flex align-items-center justify-content-between">
+                                <div className="me-2">
+                                  <img
+                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
+                                    width="60px"
+                                    height="60px"
+                                    className="rounded-5"
+                                  />
+                                </div>
+                                <div>
+                                  <span
+                                    className="fw-bold me-1"
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    Hiếu Thiên
+                                  </span>
+                                  <span style={{ fontSize: "14px" }}>
+                                    Đã bình luận về bài viết của bạn trên hệ
+                                    thống
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    >
+                      <div className="me-2">
+                        <FontAwesomeIcon
+                          icon={item.icon}
+                          className="text-white"
+                        />
+                        <span className="text-white ms-2">{item.name}</span>
+                      </div>
+                    </Tippy>
+                  ) : (
                     <Link
                       key={index}
                       to={item.link}
@@ -122,19 +215,14 @@ export default function Navbars() {
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
                     </Link>
-                  ))}
-                </Nav>
-                <Nav>
-                  {/* {menu.menu2.map((item, index) => (
-                                <Nav.Link key={index} href={item.link}>
-                                    <FontAwesomeIcon icon={item.icon} />
-                                    <span className="ms-2">{item.name}</span>
-                                </Nav.Link>
-                            ))} */}
+                  )
+                )}
+              </Nav>
+              <Nav>
+                {token ? (
                   <div className="nav-profile">
                     <Tippy
-                      // interactive
-
+                      interactive
                       placement="bottom-end"
                       render={(attrs) => (
                         <div
@@ -143,22 +231,22 @@ export default function Navbars() {
                           tabIndex="-1"
                           {...attrs}
                         >
-                          <div className="nav-profile-detail-item py-2">
-                            <i className="fas fa-user-circle"></i>
-                            Profileasfasdfagsdfasdfasd
-                          </div>
-                          <div className="nav-profile-detail-item py-2">
-                            <i className="fas fa-cog"></i>
-                            Setting
-                          </div>
-                          <div className="nav-profile-detail-item py-2">
-                            <i className="fas fa-comment-dots"></i>
-                            Status
-                          </div>
-                          <div className="nav-profile-detail-item py-2">
-                            <i className="fas fa-sign-out-alt"></i>
-                            Sign out
-                          </div>
+                          {userMenu.map((item, index) => (
+                            <Link
+                              key={index}
+                              to={item.link}
+                              onClick={item?.function}
+                              style={{ textDecoration: "none" }}
+                            >
+                              <div className="nav-profile-detail-item py-2 text-start">
+                                <FontAwesomeIcon
+                                  icon={item.icon}
+                                  className="me-2"
+                                />
+                                {item.name}
+                              </div>
+                            </Link>
+                          ))}
                         </div>
                       )}
                     >
@@ -177,10 +265,18 @@ export default function Navbars() {
                       </div>
                     </Tippy>
                   </div>
-                </Nav>
-              </Navbar.Collapse>
-            </Container>
-          </Navbar>
+                ) : (
+                  menu.menu2.map((item, index) => (
+                    <Nav.Link key={index} href={item.link}>
+                      <FontAwesomeIcon icon={item.icon} />
+                      <span className="ms-2">{item.name}</span>
+                    </Nav.Link>
+                  ))
+                )}
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
       </div>
     </div>
   );

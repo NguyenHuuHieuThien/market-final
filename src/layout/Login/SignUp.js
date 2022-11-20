@@ -1,26 +1,34 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+import * as React from "react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Link } from "react-router-dom";
 function Copyright(props) {
   return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      align="center"
+      {...props}
+    >
+      {"Copyright © "}
       <Link color="inherit" href="https://mui.com/">
         Your Website
-      </Link>{' '}
+      </Link>{" "}
       {new Date().getFullYear()}
-      {'.'}
+      {"."}
     </Typography>
   );
 }
@@ -28,44 +36,77 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignUp() {
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+  const [data, setData] = useState({});
+  console.log(data);
+  const handleData = (e) => {
+    let newData = { ...data };
+    newData[e.target.id] = e.target.value;
+    if(e.target.id === 'file'){
+      newData[e.target.id] = e.target.files[0]
+    }
+    setData(newData);
+  };
+  const submit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    let formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("username", data.username);
+        formData.append("email", data.email);
+        formData.append("password", data.password);
+        formData.append("phoneNumber", data.phoneNumber);
+        formData.append("address", data.address);
+        formData.append("sex", data.sex);
+        formData.append("birthday", data.birthday);
+        formData.append("file", data.file);
+
+        
+
+    axios.post("http://localhost:8080/api/auth/signup", formData)
+    .then(() => {
+      alert('success')
+      navigate("/sign-in");
+    })
+    .catch(err=>console.log(err))
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <div className='d-flex justify-content-center align-items-center ' style={{ height: '100vh' }}>
-        <div className='bg-white col-4 rounded-3 shadow-sm pb-5'>
+      <div
+        className="d-flex justify-content-center mt-5 align-items-center "
+       
+      >
+        <div className="bg-white col-4 rounded-3 shadow-sm pb-5">
           <Container component="main" maxWidth="xs">
             <CssBaseline />
             <Box
               sx={{
                 marginTop: 3,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              </Avatar>
+              <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}></Avatar>
               <Typography component="h1" variant="h5">
                 Đăng ký
               </Typography>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Box
+                component="form"
+                noValidate
+                onSubmit={(e) => submit(e)}
+                sx={{ mt: 3 }}
+              >
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       autoComplete="given-name"
-                      name="firstName"
+                      name="username"
                       required
                       fullWidth
-                      id="firstName"
-                      label="Họ"
+                      id="username"
+                      onChange={(e) => handleData(e)}
+                      label="Tên tài khoản"
                       autoFocus
                     />
                   </Grid>
@@ -73,10 +114,10 @@ export default function SignUp() {
                     <TextField
                       required
                       fullWidth
-                      id="lastName"
-                      label="Tên"
-                      name="lastName"
-                      autoComplete="Tên"
+                      id="name"
+                      label="Họ tên"
+                      onChange={(e) => handleData(e)}
+                      name="name"
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -86,6 +127,7 @@ export default function SignUp() {
                       id="email"
                       label="Email"
                       name="email"
+                      onChange={(e) => handleData(e)}
                       autoComplete="email"
                     />
                   </Grid>
@@ -93,9 +135,10 @@ export default function SignUp() {
                     <TextField
                       required
                       fullWidth
-                      id="phone"
+                      id="phoneNumber"
+                      onChange={(e) => handleData(e)}
                       label="Số điện thoại"
-                      name="phone"
+                      name="phoneNumber"
                       autoComplete="Số điện thoại"
                     />
                   </Grid>
@@ -104,20 +147,69 @@ export default function SignUp() {
                       required
                       fullWidth
                       id="address"
+                      onChange={(e) => handleData(e)}
                       label="Địa chỉ"
                       name="address"
                       autoComplete="Địa chỉ"
                     />
                   </Grid>
                   <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        onChange={(e) => handleData(e)}
+                        label="Mật khẩu"
+                        type="password"
+                        id="password"
+                        autoComplete="Mật khẩu"
+                      />
+                    </Grid>
+                  <Grid item xs={12}>
+                    <Grid item xs={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        name="sex"
+                        onChange={(e) => handleData(e)}
+                        label="Nữ"
+                        value="female"
+                        type="radio"
+                        id="sex"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
                     <TextField
                       required
                       fullWidth
-                      name="password"
-                      label="Mật khẩu"
-                      type="password"
-                      id="password"
-                      autoComplete="Mật khẩu"
+                      name="sex"
+                      onChange={(e) => handleData(e)}
+                      label="Nam"
+                      value="male"
+                      type="radio"
+                      id="sex"
+                    />
+                  </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      name="birthday"
+                      onChange={(e) => handleData(e)}
+                      type="date"
+                      id="birthday"
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      name="file"
+                      onChange={(e) => handleData(e)}
+                      type="file"
+                      id="file"
                     />
                   </Grid>
                 </Grid>
@@ -131,8 +223,8 @@ export default function SignUp() {
                 </Button>
                 <Grid container justifyContent="flex-end">
                   <Grid item>
-                    <Link to="/sign-in" role='button' variant="body2">
-                    Bạn đã có sẵn một tài khoản? Đăng nhập
+                    <Link to="/sign-in" role="button" variant="body2">
+                      Bạn đã có sẵn một tài khoản? Đăng nhập
                     </Link>
                   </Grid>
                 </Grid>
@@ -142,7 +234,6 @@ export default function SignUp() {
           </Container>
         </div>
       </div>
-
     </ThemeProvider>
   );
 }

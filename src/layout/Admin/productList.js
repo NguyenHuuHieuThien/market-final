@@ -72,9 +72,18 @@ const actions = [
 export default function ProductList() {
     const [show, setShow] = useState(false);
     const [products, setProducts] = useState([]);
-
+    const [id, setId] = useState()
+    console.log(products)
     const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleShow = (id) => {
+        setShow(true)
+        setId(id)
+    };
+    const deleted = () => {
+        axios.delete('')
+        .then(()=>console.log('success'))
+        .catch((err)=>console.log(err))
+    }
     useEffect(() => { 
         axios.get('http://localhost:8080/product/selectAll')
             .then(res => {
@@ -101,7 +110,7 @@ export default function ProductList() {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="danger" onClick={handleClose}>Xóa</Button>
+                    <Button variant="danger" onClick={()=>deleted}>Xóa</Button>
                 </Modal.Footer>
             </Modal>
             <div className="row">
@@ -158,16 +167,16 @@ export default function ProductList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {products.length > 0 ? products.map((product, index) => (
+                                {products && products?.length > 0 ? products.map((product, index) => (
                                     <tr key={index}>
-                                        <td className="col-1"><img src={product && product.file.length>0?`http://localhost:8080/file/downloadFile/${product.file[0].id}`:'no image'} alt="" width="100px" /></td>
+                                        {/* <td className="col-1"><img src={product && product.file.length>0?`http://localhost:8080/file/downloadFile/${product.file[0].id}`:'no image'} alt="" width="100px" /></td> */}
                                         <td>{product.productName}</td>
                                         <td>{product.price}</td>
                                         <td>{product.quantity}</td>
                                         <td>{product.date}</td>
                                         <td>{product.tradePark}</td>
                                         <td>
-                                            <button type="button" className="btn btn-info me-2"><Link style={{ textDecoration: 'none', color: 'white' }} to={`/update/product/${product.idUser}`}>Update</Link></button>
+                                            <button type="button" className="btn btn-info me-2"><Link style={{ textDecoration: 'none', color: 'white' }} to={`/product/update/${product.idUser}`}>Update</Link></button>
                                             <button type="button" className="btn btn-danger" onClick={() => handleShow(product.idUser)}>Delete</button>
                                         </td>
                                     </tr>
