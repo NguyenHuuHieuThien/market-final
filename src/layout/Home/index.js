@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import {axiosx as axios} from "./../../Helper";
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
-import Products from "../../component/Product";
 import SlideShow from "../../component/SlideShow";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {Link} from 'react-router-dom'
 export default function HomePage() {
   const [category, setCategory] = useState([])
   const [product, setProduct] = useState()
@@ -18,12 +18,16 @@ export default function HomePage() {
           axios.get('/category/searchAll')
           .then(res=> {
             setCategory(res.data)
-            console.log(res.data)
-            let product = res.data.map(item=>item.products)[0]
-            setProduct(product)
           })
           .catch(err=> console.log(err))
           }
+
+          axios.get('/product/selectAll')
+          .then(res=> {
+            console.log(res.data)
+            setProduct(res.data)
+          })
+          .catch(err=> console.log(err))
     },[])
   return (
     <div>
@@ -35,7 +39,7 @@ export default function HomePage() {
           <div>
             <div className="row">
               {category && category.length >0 && category.map(item =>
-                                          <div className="col border border-primary m-2">
+                                          <div key={item.idCategory} className="col border border-primary m-2">
                                           <div>
                                             <div>
                                               <img
@@ -62,21 +66,21 @@ export default function HomePage() {
               product.map((item, index)=>
               <div key={index} className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
               <div className="bg-white border-main">
+                <Link to={`/product/${item.idProduct}`} style={{textDecoration:'none'}}>
                 <div className="">
                   <img
-                    src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                    width="100%"
+                    src={item.idFile[0]}
+                    style={{width:'100%', height:'155px'}}
                   />
                 </div>
-                <div className="px-3 pb-2 mt-2 text-start">
+                <div className="px-3 pb-2 mt-2 text-center">
                   <div style={{ fontSize: "14px" }}>
                     {item.productName}
                   </div>
-                  <div className="d-flex justify-content-between">
                     <div className="text-main fs-13">{item.price}VND</div>
-                    <div className="form-text">đã bán 968</div>
-                  </div>
+                    <div className="form-text">Còn {item.amount}</div>
                 </div>
+                </Link>
               </div>
             </div>
               )}
@@ -90,148 +94,37 @@ export default function HomePage() {
         </h2>
         <div>
           <div>
-            <div className="row mt-2 p-2">
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
+          <div className="row mt-2 p-2">
+              {product && product.length > 0 && 
+              product.map((item, index)=>
+              <div key={index} className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
+              <div className="bg-white border-main">
+                <Link to={`/product/${item.idProduct}`} style={{textDecoration:'none'}}>
+                <div className="">
+                  <img
+                    src={item.idFile[0]}
+                    style={{width:'100%', height:'155px'}}
+                  />
                 </div>
-              </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
+                <div className="px-3 pb-2 mt-2 text-center">
+                  <div style={{ fontSize: "14px" }}>
+                    {item.productName}
                   </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
+                    <div className="text-main fs-13">{item.price}VND</div>
+                    <div className="form-text">Còn {item.amount}</div>
                 </div>
+                </Link>
               </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3">
-                <div className="bg-white border-main">
-                  <div className="">
-                    <img
-                      src="https://cf.chợ cũ.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                      width="100%"
-                    />
-                  </div>
-                  <div className="px-3 pb-2 mt-2 text-start">
-                    <div style={{ fontSize: "14px" }}>
-                      áo khoác thể thao 3 sọc chất thun nỉ dày dặn
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <div className="text-main">45.000</div>
-                      <div className="form-text">đã bán 968</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
+              )}
             </div>
           </div>
         </div>
         <div className="mt-5 pb-5">
-          <button className="px-5 btn btn-success">
+          <Link to='/product/list' className="px-5 btn btn-success">
             Xem thêm
             <FontAwesomeIcon icon={faArrowRight} className="ms-2" />
-          </button>
+          </Link>
         </div>
       </div>
       <div className="container mt-3 mb-5 text-start">

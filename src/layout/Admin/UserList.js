@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash,faArrowsRotate,faChevronRight, faTrashCan,faHome, faList, faCheck,faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { Link } from 'react-router-dom';
 import ModalReact from "../../component/Modal";
-import axios from 'axios';
+import {axiosx as axios} from '../../Helper'
 
 const actions = [
     { name: 'Nạp lại', icon: faArrowsRotate, bg: 'success' },
@@ -80,15 +80,16 @@ export default function UserList() {
     }
     const [data, setData] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/user/user-full')
-            .then(res =>setData(res.data))
-            .catch(err => {
-                console.log(err);
-            })
-    }, [data])
-    console.log(data);
+       if(axios){
+        axios.get('/user/user-full')
+        .then(res =>setData(res.data.filter(item=> item.status ==='active')))
+        .catch(err => {
+            console.log(err);
+        })
+       }
+    }, [])
     const deleteUser = () => {
-        axios.delete(`http://localhost:8080/user/delete/${userid}`)
+        axios.delete(`/user/delete/${userid}`)
             .then(res => {
                 console.log(res);
                 setData(data.filter(user => user.id !== userid));
@@ -117,7 +118,7 @@ export default function UserList() {
                             <div className='py-1 ps-3 mb-3'>
                                 {profileMenu.map((item, index) => {
                                     return (
-                                        <Link to={item.link} className="text-decoration-none text-black">
+                                        <Link to={item.link} key={index} className="text-decoration-none text-black">
                                             <div className='d-flex justify-content-between p-3 mb-3'>
                                                 <span><FontAwesomeIcon icon={item.icon} className="me-2" /> {item.name}</span>
                                                 <FontAwesomeIcon icon={faChevronRight} />
@@ -156,33 +157,31 @@ export default function UserList() {
                         <Table>
                             <thead className=''>
                                 <tr className='border-underline'>
-                                    <th>STT</th>
                                     <th>Avatar</th>
                                     <th>Tên</th>
                                     <th>Email</th>
-                                    <th>SDT</th>
+                                    {/* <th>SDT</th>
                                     <th>Địa chỉ</th>
-                                    <th>Role</th>
+                                    <th>Role</th> */}
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.length > 0 ? data.map((user, index) => (
                                     <tr key={index}>
-                                        <td>{index + 1}</td>
                                         <td className='col-1'><img style={{ width: '50px', height: '50px', borderRadius: '50%' }} src={user.image} /></td>
                                         <td>{user.username}</td>
                                         <td>{user.email}</td>
-                                        <td>{user.phoneNumber}</td>
+                                        {/* <td>{user.phoneNumber}</td>
                                         <td>{user.address}</td>
                                         <td>
                                             <MDBBadge color={user.badge} pill>
                                                 {user.role}
                                             </MDBBadge>
-                                        </td>
+                                        </td> */}
                                         <td>
-                                            <button type="button" className="btn btn-info me-2"><Link style={{ textDecoration: 'none', color: 'white' }} to={`/update/${user.idUser}`}>Update</Link></button>
-                                            <button type="button" className="btn btn-danger" onClick={() => handleShow(user.idUser)}>Delete</button>
+                                            <button type="button" className="btn btn-info me-2"><Link style={{ textDecoration: 'none', color: 'white' }} to={`/user/update/${user.idUser}`}>Sửa</Link></button>
+                                            <button type="button" className="btn btn-danger" onClick={() => handleShow(user.idUser)}>Xóa</button>
                                         </td>
                                     </tr>
                                 )) : <tr ><td colSpan="8">Chưa có người dùng nào.<Link to='/sign-up'>Tạo mới một người dùng</Link></td></tr>}

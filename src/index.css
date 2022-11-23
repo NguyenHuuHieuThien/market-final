@@ -92,6 +92,14 @@ input:focus {
   width: 100%;
   height: 100%;
 }
+.limit-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* number of lines to show */
+          line-clamp: 1; 
+  -webkit-box-orient: vertical;
+}
 
 .content {
   width: calc(100% - 50px);
@@ -179,9 +187,7 @@ input:focus {
   border-bottom: 3px solid #e74c3c !important;
 }
 
-.border-main{
-  border: 1px solid #2ecc71 !important;
-}
+
 
 
 .upload{
@@ -190,8 +196,8 @@ background-color: #e84a5f
 
 /* border */
 .border-main {
-  border: 5px solid #ae68bb !important;
-  border-radius: 10px
+  border: 2px solid #ae68bb !important;
+  border-radius: 5px
 
 }
 

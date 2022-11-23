@@ -82,6 +82,7 @@ const submit = e => {
               {profileMenu.map((item, index) => {
                 return (
                   <Link
+                  key={index}
                     to={item.link}
                     className="text-decoration-none text-black"
                   >

@@ -1,12 +1,8 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-
-import Navbars from "../../component/Navbars";
-import Footer from "../../component/Footer";
+import {axiosx as axios } from '../../Helper'
 import BgUser from "../../component/BgUser";
+import MyToast from "../../component/Toast";
 import { Link,useParams,useNavigate  } from "react-router-dom";
 function Adduser() {
     let { id } = useParams();
@@ -29,9 +25,11 @@ function Adduser() {
       birthdate = dataUpdate.birthday.split(' ')[0]
     }
     useEffect(()=>{
-      axios.get(`http://localhost:8080/user/selectById/${id}`)
+     if(axios){
+      axios.get(`/user/selectById/${id}`)
       .then(res=>setDataUpdate(res.data))
       .catch(err=> console.log(err))
+     }
     },[])
     console.log(dataUpdate);
     const handle = (e) => {
@@ -55,9 +53,10 @@ function Adduser() {
       e.preventDefault();
       if (id) {
         axios
-          .put(`http://localhost:8080/user/update/${id}`, dataUpdate)
+          .put(`/user/update/${id}`, dataUpdate)
           .then((res) => {
-            console.log("success");
+            setShow(true)
+            // navigate('/admin/users')
           })
           .catch((err) => {
             console.log(err);
@@ -74,7 +73,7 @@ function Adduser() {
         formData.append("username", data.username);
         formData.append("file", data.file);
         axios
-          .post(`http://localhost:8080/user/insertUserFile`, formData)
+          .post(`/user/insertUserFile`, formData)
           .then((res) => {
               alert("Tạo người dùng thành công");
               navigate("/admin/users")
@@ -84,9 +83,11 @@ function Adduser() {
           });
       }
     };
+    const [show, setShow] = useState('false')
     
     return ( 
         <BgUser>
+          <MyToast show={show} children='Thành Công!!!'/>
             <form onSubmit={(e) => submit(e)}>
             <div className="px-5 py-3 text-start">
               <h1 className="mb-5 mt-5">Thêm người dùng</h1>
@@ -144,7 +145,7 @@ function Adduser() {
                           id="sex"
                           onChange={(e) => handle(e)}
                           value = 'female'
-                          // checked={dataUpdate&&dataUpdate.sex === 'female'}
+                          checked={dataUpdate.sex === 'female'}
                         />
                         <label class="form-check-label" for="male">
                           Nam
@@ -158,22 +159,10 @@ function Adduser() {
                           id="sex"
                           onChange={(e) => handle(e)}
                           value = 'male'
-                          // checked={false}
+                          checked={dataUpdate.sex === 'male'}
                         />
                         <label class="form-check-label" for="female">
                           Nữ
-                        </label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="inlineRadioOptions"
-                          id="orther"
-                          value="3"
-                        />
-                        <label class="form-check-label" for="orther">
-                          Khác
                         </label>
                       </div>
                     </div>

@@ -2,12 +2,18 @@ import React from 'react';
 import { MDBFooter, MDBContainer, MDBRow, MDBCol, MDBIcon } from 'mdb-react-ui-kit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTelegram, faTwitter, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { Link } from 'react-router-dom';
 
 const footerList1 = [
-  'Trang chủ', 'Sản phẩm', 'Giỏ hàng'
+ {name: 'Trang chủ', link: '/'},
+ {name: 'Sản phẩm', link: '/product/list'},
+ {name: 'Giỏ hàng', link: '/carts'},
 ]
 const footerList2 = [
-  'Đăng bài', 'Liên hệ', 'Tài khoản'
+ {name: 'Đăng bài', link: '/product/add'},
+ {name: 'Liên hệ', link: '/'},
+ {name: 'Tài khoản', link: 'user/profile'},
+  
 ]
 export default function Footer() {
   return (
@@ -31,15 +37,20 @@ export default function Footer() {
                 <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex text-uppercase fw-bold">
                   <div className="me-5">
                     {footerList1.map((item, index) =>
-                      <div className="mb-4" key={index}><a className="text-decoration-none" href=""><span
-                        className="text-white text-hover">{item}</span></a></div>
+                      <div><Link to={item.link} className="mb-4" key={index}>
+                        <span
+                        className="text-white text-hover">{item.name}</span>
+                        </Link>
+                        </div>
                      )}
                   </div>
                   <div>
-                    {footerList2.map((item, index) =>
-                      <div className="mb-4" key={index}><a className="text-decoration-none" href=""><span
-                        className="text-white text-hover">{item}</span></a></div>
-                    )}
+                  {footerList2.map((item, index) =>
+                      <div><Link to={item.link} className="mb-4" key={index}>
+                        <span
+                        className="text-white text-hover">{item.name}</span>
+                        </Link></div>
+                     )}
                   </div>
                 </div>
               </div>

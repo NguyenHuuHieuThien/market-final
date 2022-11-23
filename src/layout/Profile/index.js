@@ -13,12 +13,9 @@ import {
   MDBTableHead,
 } from "mdb-react-ui-kit";
 import { axiosx as axios } from "../../Helper";
-
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { json, Link } from "react-router-dom";
-import { Collapse } from "react-bootstrap";
 import ModalReact from "../../component/Modal";
 import MyCollapse from "../../component/Collapse";
 import BgUser from "../../component/BgUser";
@@ -27,6 +24,7 @@ export default function ProfilePage() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   let user = JSON.parse(localStorage.getItem("token"));
+  console.log(user);
   return (
     <>
       <BgUser>
@@ -88,7 +86,7 @@ export default function ProfilePage() {
                   </MDBCol>
                   <MDBCol sm="7">
                     <MDBCardText className="text-muted">
-                      Nguyễn Hữu Hiếu Thiên
+                      {user.name}
                     </MDBCardText>
                     <MyCollapse open={open} children="abc" />
                   </MDBCol>
@@ -111,7 +109,7 @@ export default function ProfilePage() {
                   </MDBCol>
                   <MDBCol sm="7">
                     <MDBCardText className="text-muted">
-                      nguyenthien3347@gmail.com
+                      {user.email}
                     </MDBCardText>
                     <MyCollapse open={open} children="bca" />
                   </MDBCol>
@@ -132,7 +130,7 @@ export default function ProfilePage() {
                     <MDBCardText>Ngày sinh</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="7">
-                    <MDBCardText className="text-muted">17/07/2000</MDBCardText>
+                    <MDBCardText className="text-muted">{user.birthday}</MDBCardText>
                     <MyCollapse open={open} children="bca" />
                   </MDBCol>
                   <MDBCol sm="2">
@@ -152,7 +150,7 @@ export default function ProfilePage() {
                     <MDBCardText>Giới tính</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="7">
-                    <MDBCardText className="text-muted">Nam</MDBCardText>
+                    <MDBCardText className="text-muted">{user.sex ==='male'?'Nam': 'Nữ'}</MDBCardText>
                     <MyCollapse open={open} children="bca" />
                   </MDBCol>
                   <MDBCol sm="2">
@@ -172,7 +170,7 @@ export default function ProfilePage() {
                     <MDBCardText>Số điện thoại</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="7">
-                    <MDBCardText className="text-muted">0941549525</MDBCardText>
+                    <MDBCardText className="text-muted">{user.phoneNumber}</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="2">
                     <MDBCardText className="text-muted">
@@ -187,7 +185,7 @@ export default function ProfilePage() {
                   </MDBCol>
                   <MDBCol sm="7">
                     <MDBCardText className="text-muted">
-                      71 Ngũ Hành Sơn, Q.Ngũ Hành Sơn, TP.Đà Nẵng
+                      {user.address}
                     </MDBCardText>
                   </MDBCol>
                   <MDBCol sm="2">

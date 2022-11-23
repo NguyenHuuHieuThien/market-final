@@ -73,6 +73,11 @@ export default function Navbars() {
       link: "/user/profile",
     },
     {
+      name: "Đi tới Admin",
+      link: "/admin/users",
+      icon: faHome,
+    },
+    {
       name: "Đăng bài",
       icon: faPenToSquare,
       link: "/product/add",
@@ -108,6 +113,7 @@ export default function Navbars() {
                 {menu.menu1.map((item, index) =>
                   item.name === "Thông báo" ? (
                     <Tippy
+                    key={index}
                       interactive
                       placement="bottom"
                       render={(attrs) => (

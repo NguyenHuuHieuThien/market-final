@@ -4,17 +4,11 @@ import { useParams } from "react-router-dom";
 import { axiosx as axios } from "../../Helper";
 
 import BgUser from "../../component/BgUser";
-export default function AddproductPage() {
+export default function AddCatefory() {
   let { id } = useParams();
   let [dataUpdate, setDataUpdate] = useState({});
   const [data, setData] = useState({
-    productName: "",
-    category: "",
-    price: "",
-    amount: "",
-    description: "",
-    files: "",
-    tradePark: "",
+    categoryName: "",
   });
   const [categories, setCategories] = useState([])
   useEffect(() => {
