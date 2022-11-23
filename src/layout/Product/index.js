@@ -1,6 +1,8 @@
+/* eslint-disable jsx-a11y/alt-text */
 import { Row, Col, Badge } from "react-bootstrap";
 import * as React from "react";
-import { axiosx as axios } from "./../../Helper";
+import { axiosx } from "./../../Helper";
+import axios from "axios";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -15,49 +17,17 @@ import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
 import Category from "../../component/Categories";
 import { useCallback } from "react";
-// const categories = [
-//     'table',
-//     'motobike',
-//     'chair',
-//     'cabinet',
-//     'bed',
-//     'clother',
-//     'shoes',
-//     'watch',
-//     'bag',
-//     'phone',
-//     'laptop',
-//     'computer',
-// ]
-// export const products = [
-//     { id: 1, name: 'Table', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a table' },
-//     { id: 2, name: 'Motobike', group: 'motobike', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a motobike' },
-//     { id: 3, name: 'Chair', group: 'chair', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a chair' },
-//     { id: 4, name: 'Cabinet', group: 'cabinet', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a cabinet' },
-//     { id: 5, name: 'Bed', group: 'bed', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 6, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 7, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 8, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 9, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 10, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 11, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 12, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 13, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 14, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 15, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-//     { id: 16, name: 'Desk', group: 'table', price: 100, image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg', description: 'this is a bed' },
-
-// ]
 
 export default function ProductPage() {
   const [productList, setProductList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState([]);
+  const [base64, setBase64] = useState();
   let token = JSON.parse(localStorage.getItem("token"));
   useEffect(() => {
     setIsLoading(true);
-    if (axios) {
-      axios
+    if (axiosx) {
+      axiosx
         .get("/product/selectAll")
         .then((res) => {
           setProductList(res.data);
@@ -66,10 +36,10 @@ export default function ProductPage() {
         .catch((err) => console.log(err));
     }
   }, []);
-
+  console.log(productList);
   const selectCategory = (id) => {
     setIsLoading(true);
-    axios
+    axiosx
       .get(`http://localhost:8080/category/search/${id}`)
       .then((res) => {
         console.log(res.data);
@@ -93,6 +63,10 @@ export default function ProductPage() {
     //     })
     //   );
     // }
+  };
+
+  const searchProduct = () => {
+    axios.post("/product/selectByParamProductPaging");
   };
   return (
     <div className="bg-main">
@@ -137,12 +111,9 @@ export default function ProductPage() {
                 <div className="border border-primary mb-3">
                   <div className="w-100">
                     <Card>
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image="https://startuanit.net/wp-content/uploads/2021/06/hinh-nen-hai-san-cho-may-tinh-10.jpg"
-                        alt="green iguana"
-                        className="p-2"
+                      <img
+                        src={product.idFile}
+                        style={{ width: "100%", height: "300px" }}
                       />
                       <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
@@ -164,7 +135,11 @@ export default function ProductPage() {
                           <Badge bg="warning">Price</Badge>
                           {product.price}$
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          className="limit-text"
+                          color="text.secondary"
+                        >
                           {product.description}
                         </Typography>
                       </CardContent>
