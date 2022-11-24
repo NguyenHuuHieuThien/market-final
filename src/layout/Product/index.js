@@ -112,7 +112,7 @@ export default function ProductPage() {
                   <div className="w-100">
                     <Card>
                       <img
-                        src={product.idFile}
+                        src={product.idFile[0]}
                         style={{ width: "100%", height: "300px" }}
                       />
                       <CardContent>

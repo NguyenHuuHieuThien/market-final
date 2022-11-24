@@ -93,8 +93,8 @@ export default function Carts() {
               <th>STT</th>
               <th>Hình ảnh</th>
               <th>Tên sản phẩm</th>
-              <th>Giá</th>
               <th>Số lượng</th>
+              <th>Thành Tiền</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -122,8 +122,8 @@ export default function Carts() {
                     />
                   </td>
                   <td>{item.product.productName}</td>
-                  <td>{item.product.price}</td>
                   <td>{item.product.amount}</td>
+                  <td>{item.product.price}</td>
                   <td>
                     <button
                       onClick={() => handleDelete(item.idCart)}

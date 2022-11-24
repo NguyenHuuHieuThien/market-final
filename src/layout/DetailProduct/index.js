@@ -1,6 +1,6 @@
 import ImageGallery from "react-image-gallery";
 import { Row, Col } from "react-bootstrap";
-import { useState } from "react";
+import { useState} from "react";
 import { axiosx as axios } from "../../Helper";
 
 import Navbars from "../../component/Navbars";
@@ -35,7 +35,6 @@ import { useEffect } from "react";
 //     thumbnail: "https://picsum.photos/id/1019/250/150/",
 //   },
 // ];
-
 export default function DetailProduct() {
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
@@ -44,18 +43,41 @@ export default function DetailProduct() {
   let provinces = Object.values(province);
   let [amount, setAmount] = useState(1);
   const [data, setData] = useState({});
+  const [image, setImage] = useState()
+  const [totalComment, setTotalComment] = useState(0)
+  // console.log(commentList)
   let { id } = useParams();
+  let user = JSON.parse(localStorage.getItem('token'))
   const submit = (e) => {
     e.preventDefault();
+    let formData = new FormData()
+    formData.append('commentContent', comment)
+    formData.append("file1", image??new File([""], ""));
     axios
-      .post("/comment/insertCommentAndFile?idUser=...&idProduct=", comment)
-      .then(() => console.log("success"))
+      .post(`/comment/insertCommentAndFile?idUser=${user.id}&idProduct=${id}`, formData,{
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }}
+        )
+      .then(() => {
+        console.log('success')
+        setTotalComment(totalComment+1)
+      })
       .catch((err) => console.log(err));
   };
   const addToCart = () => {
+    if(amount > data.amount){
+      alert('amount not enough')
+      return
+    }
     axios
-      .post(`/cart/insert?idUser=1&idProduct=${id}&amount=${amount}`)
-      .then(() => console.log("success"))
+      .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {amount:amount})
+      .then(() => {
+        console.log('success')
+        axios.put(`/product/update/${id}`,{...data, amount: data.amount - amount})
+        .then(()=>console.log('success'))
+        .catch(err=>console.log(err))
+      })
       .catch((err) => console.log(err));
   };
   useEffect(() => {
@@ -66,16 +88,18 @@ export default function DetailProduct() {
           console.log(res.data);
           setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
           setProducts(res.data);
-          // setImages(res.data.idFile,'https://picsum.photos/id/1019/250/150/')
         })
         .catch((err) => console.log(err));
 
       axios
         .get(`/comment/selectById/${id}`)
-        .then((res) => setCommentList(res.data))
+        .then((res) => {
+          setCommentList(res.data)
+          setTotalComment(res.data.length)
+        })
         .catch((err) => console.log(err));
     }
-  }, []);
+  }, [totalComment]);
   return (
     <div>
       <div className="bg-main">
@@ -123,7 +147,7 @@ export default function DetailProduct() {
                     onClick={() => setAmount(amount + 1)}
                   />
                 </div>
-                <div className="form-text">8384 Số lượng có sẵn</div>
+                <div className="form-text">{data&&data.amount > 0?data.amount:0} Số lượng có sẵn</div>
               </div>
               <div className="mt-4">
                 <button className="btn btn-primary me-3" onClick={addToCart}>
@@ -193,42 +217,14 @@ export default function DetailProduct() {
               <div className="mb-5">
                 <div>{data.productName}</div>
                 <div className="mt-3">
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    chất liệu vải tuyết mưa dày dặn
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    chất liệu mềm mịn ,thoáng mát thấm hút mồ hôi tốt
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Thiết kế chi tiết ,tỉ mỉ từng chi tiết dù là nhỏ nhất.
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Kiểu dáng slim trẻ trung ,ống đứng xếp li ôm dáng.
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Có nhiều màu sắc cho bạn lựa chon: đen ,xanh than, xanh đen
-                    ,ghi sáng,.
-                  </div>
+                    {data.description && data.description.replace(/-/g, '').replace(/\r/g, '').split('\n').filter(item=> item !== "").map(item=>
+                      <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      {item}
+                    </div>)}
                 </div>
               </div>
               <div>
@@ -301,6 +297,12 @@ export default function DetailProduct() {
                   />
                   <label for="floatingInput">Nhập đánh giá...</label>
                 </div>
+                <div class="form-floating mb-3">
+                  <input
+                    type="file"
+                    onChange={e => setImage(e.target.files[0])}
+                  />
+                </div>
                 <div>
                   <button type="submit" className="btn btn-success rounded-1">
                     Bình luận
@@ -322,7 +324,7 @@ export default function DetailProduct() {
                     <div>
                       <div className="fw-bold">Hua Khai</div>
                       <div className="form-text">
-                        2022-10-10 14:28 | Phân loại hàng: Tủ lạnh
+                        2022-10-10 14:28 | Phân loại hàng: {data.category && data.category.categoryName}
                       </div>
                       <div className="w-50">
                         <span>{item.comment}</span>

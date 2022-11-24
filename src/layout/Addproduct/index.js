@@ -16,7 +16,9 @@ export default function AddproductPage() {
     files: "",
     tradePark: "",
   });
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState([]);
+  const [idcategory, setIdCategory] = useState(1);
+  const user = JSON.parse(localStorage.getItem('token'))
   useEffect(() => {
     if (axios) {
       axios.get('/category/searchAll')
@@ -60,6 +62,7 @@ export default function AddproductPage() {
       formData.append("price", data.price);
       formData.append("description", data.description);
       formData.append("tradePark", data.tradePark);
+      formData.append("amount", data.amount);
       if (data && data.files.length > 0) {
         for (let i = 0; i < data.files.length; i++) {
           formData.append("files", data.files[i]);
@@ -67,7 +70,7 @@ export default function AddproductPage() {
       }
 
       axios
-        .post(`/product/insertProductAndMulFile?idUser=1&idCategory=1`, formData, {
+        .post(`/product/insertProductAndMulFile?idUser=${user.id}&idCategory=${idcategory}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -148,7 +151,7 @@ export default function AddproductPage() {
                 <label for="productName" class="form-label fw-bold">
                   Loại sản phẩm
                 </label>
-                <select class="form-select">
+                <select class="form-select" onChange={(e)=>setIdCategory(Number(e.target.value))}>
                   {categories && categories.length> 0 && categories.map(item=>
                     <option key={item.idCategory} value={item.idCategory}>{item.categoryName}</option>)}
                 </select>

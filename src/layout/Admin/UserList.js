@@ -67,7 +67,7 @@ const profileMenu = [
     { name: 'Phê duyệt bài đăng', link: '/admin/product-list', icon: faCheck },
     { name: 'Đăng xuất', link: '/', icon: faRightFromBracket },
 ]
- 
+
 export default function UserList() {
     const [show, setShow] = useState(false);
     // const [users, setUsers] = useState(Users);
@@ -79,6 +79,7 @@ export default function UserList() {
         setUserId(id)
     }
     const [data, setData] = useState([]);
+    console.log(data);
     useEffect(() => {
        if(axios){
         axios.get('/user/user-full')
@@ -93,6 +94,7 @@ export default function UserList() {
             .then(res => {
                 console.log(res);
                 setData(data.filter(user => user.id !== userid));
+                setShow(false)
             })
             .catch(err => {
                 console.log(err);
@@ -169,7 +171,7 @@ export default function UserList() {
                             <tbody>
                                 {data.length > 0 ? data.map((user, index) => (
                                     <tr key={index}>
-                                        <td className='col-1'><img style={{ width: '50px', height: '50px', borderRadius: '50%' }} src={user.image} /></td>
+                                        <td className='col-1'><img style={{ width: '50px', height: '50px', borderRadius: '50%' }} src={user.urlImageSet[0]} /></td>
                                         <td>{user.username}</td>
                                         <td>{user.email}</td>
                                         {/* <td>{user.phoneNumber}</td>

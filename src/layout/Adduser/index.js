@@ -55,8 +55,7 @@ function Adduser() {
         axios
           .put(`/user/update/${id}`, dataUpdate)
           .then((res) => {
-            setShow(true)
-            // navigate('/admin/users')
+            navigate('/admin/users')
           })
           .catch((err) => {
             console.log(err);
