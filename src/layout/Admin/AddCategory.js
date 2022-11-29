@@ -83,6 +83,7 @@ export default function AddCatefory() {
                   Tên sản phẩm
                 </label>
                 <input
+                required
                   onChange={(e) => handle(e)}
                   value={dataUpdate ? dataUpdate.productName : ""}
                   type="text"
@@ -96,6 +97,7 @@ export default function AddCatefory() {
                   Giá
                 </label>
                 <input
+                required
                   onChange={(e) => handle(e)}
                   value={dataUpdate ? dataUpdate.price : 0}
                   type="number"
@@ -113,6 +115,7 @@ export default function AddCatefory() {
                       Số lượng
                     </label>
                     <input
+                    required
                       onChange={(e) => handle(e)}
                       type="text"
                       placeholder="Nhập số lượng..."
@@ -128,6 +131,7 @@ export default function AddCatefory() {
                       Trade Park
                     </label>
                     <input
+                    required
                       onChange={(e) => handle(e)}
                       value={dataUpdate ? dataUpdate.tradePark : ""}
                       type="text"
@@ -154,6 +158,7 @@ export default function AddCatefory() {
                   Thêm hình
                 </label>
                 <input
+                required
                   type="file"
                   multiple
                   class="form-control"

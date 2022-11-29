@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
 import { axiosx as axios } from '../../Helper';
-function Category({selectCategory, getCategories}) {
+function Category({selectCategory,allCategory ,getCategories}) {
     const [categories, setCategories] = useState([])
     useEffect(()=>{
        if(axios){
@@ -14,8 +14,9 @@ function Category({selectCategory, getCategories}) {
     })()
     return ( 
         <ul className='d-flex list-unstyled gap-2 mt-3'>
+            <li className='border border-primary' role="button" onClick={allCategory}><a className='text-xs text-decoration-none p-2'>Tất cả sản phẩm</a></li>
         {categories.length > 0 && categories.map((category, index) =>
-            <li key={category.idCategory} onClick={() => selectCategory(category.idCategory)} className='border border-primary ' role="button">
+            <li key={category.idCategory} onClick={() => selectCategory(category.idCategory)} className='border border-primary' role="button">
                 <a className='text-xs text-decoration-none p-2'>{category.categoryName}</a>
             </li>
         )}

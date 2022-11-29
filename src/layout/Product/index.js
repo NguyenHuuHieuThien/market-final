@@ -20,31 +20,30 @@ import { useCallback } from "react";
 
 export default function ProductPage() {
   const [productList, setProductList] = useState([]);
+  const [productCategory, setProductCategory] = useState([])
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState([]);
-  const [base64, setBase64] = useState();
-  let token = JSON.parse(localStorage.getItem("token"));
   useEffect(() => {
     setIsLoading(true);
     if (axiosx) {
       axiosx
         .get("/product/selectAll")
         .then((res) => {
-          setProductList(res.data);
+          setProductList(res.data.filter(item=> item.status === 'active'));
+          setProductCategory(res.data.filter(item=> item.status === 'active'))
           setIsLoading(false);
         })
         .catch((err) => console.log(err));
     }
   }, []);
-  console.log(productList);
+  console.log(productCategory);
   const selectCategory = (id) => {
     setIsLoading(true);
     axiosx
       .get(`http://localhost:8080/category/search/${id}`)
       .then((res) => {
         console.log(res.data);
-        setProductList(
-          productList.filter(
+        setProductCategory(productList.filter(
             (product) => product.idCategory === res.data.idCategory
           )
         );
@@ -65,6 +64,18 @@ export default function ProductPage() {
     // }
   };
 
+  const allCategory =()=>{
+    setIsLoading(true);
+    axiosx
+        .get("/product/selectAll")
+        .then((res) => {
+          setProductCategory(res.data.filter(item=> item.status === 'active'));
+          setIsLoading(false);
+        })
+        .catch((err) => console.log(err));
+  }
+
+
   const searchProduct = () => {
     axios.post("/product/selectByParamProductPaging");
   };
@@ -76,6 +87,7 @@ export default function ProductPage() {
           Sản phẩm
         </h1>
         <Category
+        allCategory={allCategory}
           getCategories={getCategories}
           selectCategory={selectCategory}
         />
@@ -103,7 +115,7 @@ export default function ProductPage() {
               <span class="visually-hidden">Loading...</span>
             </div>
           ) : (
-            productList.map((product, index) => (
+            productCategory.map((product, index) => (
               <div
                 className="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3"
                 key={index}
@@ -112,7 +124,7 @@ export default function ProductPage() {
                   <div className="w-100">
                     <Card>
                       <img
-                        src={product.idFile[0]}
+                        src={product.urlFile[0]}
                         style={{ width: "100%", height: "300px" }}
                       />
                       <CardContent>

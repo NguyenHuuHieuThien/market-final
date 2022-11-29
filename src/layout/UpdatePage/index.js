@@ -110,6 +110,7 @@ const submit = e => {
                       Email
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="text"
                       placeholder="Nhập email..."
@@ -122,6 +123,7 @@ const submit = e => {
                       Tên Tài khoản
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="text"
                       placeholder="Nhập tên tài khoản..."
@@ -134,6 +136,7 @@ const submit = e => {
                       Họ tên
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="text"
                       placeholder="Nhập họ tên..."
@@ -148,6 +151,7 @@ const submit = e => {
                     <div className=" border border-main p-2">
                       <div class="form-check form-check-inline me-3">
                         <input
+                        required
                           class="form-check-input"
                           type="radio"
                           name="inlineRadioOptions"
@@ -161,6 +165,7 @@ const submit = e => {
                       </div>
                       <div class="form-check form-check-inline me-3">
                         <input
+                        required
                           class="form-check-input"
                           type="radio"
                           name="inlineRadioOptions"
@@ -174,6 +179,7 @@ const submit = e => {
                       </div>
                       <div class="form-check form-check-inline">
                         <input
+                        required
                           class="form-check-input"
                           type="radio"
                           name="inlineRadioOptions"
@@ -193,6 +199,7 @@ const submit = e => {
                       Địa chỉ
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="text"
                       placeholder="Nhập địa chỉ..."
@@ -205,6 +212,7 @@ const submit = e => {
                       Số điện thoại
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="text"
                       placeholder="Nhập số điện thoại.."
@@ -217,6 +225,7 @@ const submit = e => {
                       Ngày sinh
                     </label>
                     <input
+                    required
                     onChange={e=>handle(e)}
                       type="date"
                       class="form-control text-white"

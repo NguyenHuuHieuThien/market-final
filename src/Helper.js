@@ -1,6 +1,6 @@
 import axios from "axios";
-let token = JSON.parse(localStorage.getItem("token"));
 export const axiosx = (() => {
+  let token = JSON.parse(localStorage.getItem("token"));
   if (token) {
     return axios.create({
       baseURL: "http://localhost:8080/",

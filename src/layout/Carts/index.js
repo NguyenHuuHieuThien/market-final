@@ -1,20 +1,21 @@
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
 import { axiosx as axios } from "../../Helper";
-import Toast from "react-bootstrap/Toast";
 import { Link } from "react-router-dom";
 
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
 import ModalReact from "../../component/Modal";
-import { ToastContainer } from "react-bootstrap";
+import {useSnackbar} from 'notistack'
 
 export default function Carts() {
+  const {enqueueSnackbar} = useSnackbar();
   const [show, setShow] = useState(false);
   const [toast, setToast] = useState(false);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   console.log(data);
+  let user = JSON.parse(localStorage.getItem('token'))
   const handleClose = () => {
     setShow(false);
     setToast(true);
@@ -22,7 +23,7 @@ export default function Carts() {
   useEffect(() => {
     if (axios) {
       axios
-        .get(`/cart/findById/1`)
+        .get(`/cart/findById/${user.id}`)
         .then((res) => {
           setData(res.data);
           setIsLoading(false);
@@ -30,61 +31,32 @@ export default function Carts() {
         .catch((error) => console.log(error));
     }
   }, []);
+  const hanldeData = e =>{
+      let newData = {...data}
+      newData[e.target.id] = e.target.value;
+      setData(newData)
+  }
   const handleDelete = (id) => {
     axios
       .delete(`/cart/delete/${id}`)
       .then((res) => setData(data.filter((item) => item.idCart !== id)));
   };
+  const order =id=>{
+    console.log(data)
+    let _data = {...data}
+    delete _data.product
+    _data.totalPrice = data[0].amount * data[0].product.price
+    let date = new Date()
+    _data.createDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+    _data.amount = data[0].amount
+    console.log(_data)
+    axios.post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
+    .then(()=>enqueueSnackbar('Đã đặt đơn hàng', {variant:'success'}))
+    .catch(()=>enqueueSnackbar('Đặt đơn hàng thất bại', {variant:'error'}))
+  }
   return (
     <div className="bg-main shadow-sm">
-      {toast && (
-        <ToastContainer position="middle-end">
-          <Toast
-            onClose={() => setToast(false)}
-            bg="success"
-            show={toast}
-            delay={3000}
-            autohide
-          >
-            <Toast.Body>
-              Woohoo, you're reading this text in a Toast!
-            </Toast.Body>
-          </Toast>
-        </ToastContainer>
-      )}
-      <ModalReact
-        children={
-          <table className="table">
-            <thead className="text-center">
-              <tr className="border-underline">
-                <th scope="col">Tên</th>
-                <th scope="col">Số lượng</th>
-                <th scope="col">Đơn giá</th>
-                <th scope="col">Thành tiền</th>
-              </tr>
-            </thead>
-            <tbody className=" text-center">
-              <tr>
-                <td>Mark</td>
-                <td>12</td>
-                <td>10.000</td>
-                <td>120.000</td>
-              </tr>
-              <tr>
-                <th scope="row" className="text-start" colSpan={3}>
-                  Tổng tiền
-                </th>
-                <td className="fw-bold">120.000</td>
-              </tr>
-            </tbody>
-          </table>
-        }
-        show={show}
-        handleClose={handleClose}
-        title="Thanh toán"
-      ></ModalReact>
       <Navbars />
-
       <div className="container mt-5 mb-5 position-relative bg-white p-3 rounded-3">
         <h1 className="mb-5">Giỏ hàng</h1>
         <Table striped bordered hover>
@@ -94,7 +66,7 @@ export default function Carts() {
               <th>Hình ảnh</th>
               <th>Tên sản phẩm</th>
               <th>Số lượng</th>
-              <th>Thành Tiền</th>
+              <th>Giá</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -122,7 +94,7 @@ export default function Carts() {
                     />
                   </td>
                   <td>{item.product.productName}</td>
-                  <td>{item.product.amount}</td>
+                  <td>{item.amount}</td>
                   <td>{item.product.price}</td>
                   <td>
                     <button
@@ -144,9 +116,10 @@ export default function Carts() {
         </Table>
 
         <div className="text-right mb-4">
-          <h3 className="mt-4 mb-5 uppercase">Tổng sản phẩm: 20</h3>
+          <h3 className="mt-4 mb-5 uppercase">Tổng sản phẩm: {data.length}</h3>
+          <h3 className="mt-4 mb-5 uppercase">Tổng tiền: {data.length> 0 && data.map(item=> item.amount * item.product.price).reduce((acc, cur)=> acc + cur,0).toLocaleString()} VND</h3>
           <button
-            onClick={() => setShow(true)}
+            onClick={()=>order(data[0].product.idProduct)}
             className="btn btn-outline-success px-5 rounded-5 mr-0"
           >
             Thanh Toắn

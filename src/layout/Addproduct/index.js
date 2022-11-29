@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { axiosx as axios } from "../../Helper";
-
+import { useSnackbar } from "notistack"
 import BgUser from "../../component/BgUser";
 export default function AddproductPage() {
+  const {enqueueSnackbar} = useSnackbar();
   let { id } = useParams();
   let [dataUpdate, setDataUpdate] = useState({});
   const [data, setData] = useState({
@@ -22,12 +23,18 @@ export default function AddproductPage() {
   useEffect(() => {
     if (axios) {
       axios.get('/category/searchAll')
-      .then(res=>setCategories(res.data))
+      .then(res=>{
+        console.log(res.data)
+        setCategories(res.data)
+      })
       .catch(err=>console.log(err))
      if(id){
       axios
-      .get(`/product/selectById/${id}`)
-      .then((res) => setDataUpdate(res.data))
+      .get(`/product/selectByMulId/?mulId=${id}`)
+      .then((res) => {
+        console.log(res.data)
+        setDataUpdate(res.data[0])
+      })
       .catch((err) => console.log(err));
   }
      }
@@ -54,7 +61,7 @@ export default function AddproductPage() {
     e.preventDefault();
     if (id) {
       axios.put(`/product/update/${id}`, dataUpdate).then((res) => {
-        console.log(res);
+        enqueueSnackbar('Sửa thành công', {variant: 'success'})
       });
     } else {
       let formData = new FormData();
@@ -76,8 +83,9 @@ export default function AddproductPage() {
           },
         })
         .then((res) => {
-          console.log(res);
-        });
+          enqueueSnackbar('Thêm sản phẩm thành công', {variant: 'success'})
+        })
+        .catch(()=>enqueueSnackbar('Thêm sản phẩm thất bại', {variant: 'error'}))
     }
   };
   return (
@@ -93,6 +101,7 @@ export default function AddproductPage() {
                 </label>
                 <input
                   onChange={(e) => handle(e)}
+                  required
                   value={dataUpdate ? dataUpdate.productName : ""}
                   type="text"
                   placeholder="Nhập tên sản phẩm..."
@@ -106,6 +115,7 @@ export default function AddproductPage() {
                 </label>
                 <input
                   onChange={(e) => handle(e)}
+                  required
                   value={dataUpdate ? dataUpdate.price : 0}
                   type="number"
                   placeholder="Nhập giá..."
@@ -123,7 +133,9 @@ export default function AddproductPage() {
                     </label>
                     <input
                       onChange={(e) => handle(e)}
+                      required
                       type="text"
+                      value={dataUpdate.amount}
                       placeholder="Nhập số lượng..."
                       class="form-control"
                       id="amount"
@@ -138,6 +150,7 @@ export default function AddproductPage() {
                     </label>
                     <input
                       onChange={(e) => handle(e)}
+                      required
                       value={dataUpdate ? dataUpdate.tradePark : ""}
                       type="text"
                       placeholder="Nhập trade park..."
@@ -164,6 +177,7 @@ export default function AddproductPage() {
                 </label>
                 <input
                   type="file"
+                  required
                   multiple
                   class="form-control"
                   onChange={(e) => handle(e)}

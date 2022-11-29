@@ -37,7 +37,7 @@ export default function Footer() {
                 <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex text-uppercase fw-bold">
                   <div className="me-5">
                     {footerList1.map((item, index) =>
-                      <div><Link to={item.link} className="mb-4" key={index}>
+                      <div className="mb-4"  key={index}><Link to={item.link} style={{textDecoration: 'none'}}>
                         <span
                         className="text-white text-hover">{item.name}</span>
                         </Link>
@@ -46,7 +46,7 @@ export default function Footer() {
                   </div>
                   <div>
                   {footerList2.map((item, index) =>
-                      <div><Link to={item.link} className="mb-4" key={index}>
+                      <div  key={index} className="mb-4"><Link to={item.link} style={{textDecoration: 'none'}}>
                         <span
                         className="text-white text-hover">{item.name}</span>
                         </Link></div>

@@ -1,5 +1,6 @@
 import SideBars from "../../component/SideNav";
 import { Row, Col, Button } from "react-bootstrap";
+import {axiosx as axios} from '../../Helper'
 import Table from "react-bootstrap/Table";
 import React, { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
@@ -15,14 +16,16 @@ import {
   faCheck,
   faList,
   faHome,
+  faTelevision
 } from "@fortawesome/free-solid-svg-icons";
 import { MDBInputGroup, MDBBtn, MDBBadge, MDBIcon } from "mdb-react-ui-kit";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { useSnackbar } from "notistack"
 const profileMenu = [
-  { name: "Trang chủ", link: "/", icon: faHome },
+  { name: "Trang chủ người dùng", link: "/", icon: faHome },
+  { name: "Trang sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Danh sách người dùng", link: "/admin/users", icon: faList },
-  { name: "Phê duyệt bài đăng", link: "/admin/product-list", icon: faCheck },
+  { name: "Phê duyệt bài đăng", link: "/admin/products", icon: faCheck },
   { name: "Đăng xuất", link: "/", icon: faRightFromBracket },
 ];
 const actions = [
@@ -75,53 +78,97 @@ const actions = [
 // ]
 
 export default function ProductList() {
+  const {enqueueSnackbar} = useSnackbar();
   const [show, setShow] = useState(false);
   const [products, setProducts] = useState([]);
+  const [isCheckAll, setIsCheckAll] = useState(false);
+  const [checkList, setCheckList] = useState([]);
   const [id, setId] = useState();
-  console.log(products);
   const handleClose = () => setShow(false);
   const handleShow = (id) => {
     setShow(true);
-    setId(id);
+    setId(id)
   };
-  const deleted = () => {
+  const accept = id =>{
+    axios.put(`/product/deleteListProduct/${id}?status=active`)
+      .then(()=> enqueueSnackbar('Đã phê duyệt', {variant:'success'}))
+      .catch(()=> enqueueSnackbar('Không thể phê duyệt sản phẩm', {variant:'success'}))
+  }
+  const deleted = (id) => {
     axios
-      .delete("")
-      .then(() => console.log("success"))
-      .catch((err) => console.log(err));
+      .put(`/product/deleteListProduct/${id}?status=deleted`)
+      .then(() => {
+        handleClose()
+        enqueueSnackbar('Đã bỏ bài đăng', {variant:'success'})
+      })
+      .catch((err) => enqueueSnackbar('Đã bỏ bài đăng', {variant:'success'}));
   };
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/product/selectAll")
-      .then((res) => {
-        console.log(res.data);
-        setProducts(res.data);
+      axios
+      .get("/product/selectAll")
+      .then(res => {
+        setProducts(res.data.filter(item => item.status ==='pending'));
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err); 
       });
   }, []);
+  const checkAll = () => {
+    setIsCheckAll(!isCheckAll);
+    if (!isCheckAll) {
+      setCheckList(products.map((item) => item.idProduct));
+    } else {
+      setCheckList([]);
+    }
+  };
+  const checked = (id) => {
+    if (checkList.includes(id)) {
+      setCheckList(checkList.filter((item) => item !== id));
+    } else {
+      setCheckList([...checkList, id]);
+    }
+  };
+
+  const deleteAll = ()=>{
+    axios
+    .put(`/product/deleteListProduct/${checkList}?status=deleted`)
+    .then(() => {
+      handleClose()
+      enqueueSnackbar('Đã bỏ bài đăng', {variant:'success'})
+    })
+    .catch((err) => enqueueSnackbar('Đã bỏ bài đăng', {variant:'success'}));
+  }
+
+  const activeAll = ()=>{
+    axios
+    .put(`/product/deleteListProduct/${checkList}?status=active`)
+    .then(() => {
+      handleClose()
+      enqueueSnackbar('Đã phê duyệt bài đăng', {variant:'success'})
+    })
+    .catch((err) => enqueueSnackbar('Không thể phê duyệt', {variant:'success'}));
+  }
   return (
     <div className="mt-4 bg-main">
-      <Modal
+      {/* <Modal
         show={show}
         onHide={handleClose}
         backdrop="static"
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Delete product</Modal.Title>
+          <Modal.Title>Xóa sản phẩm</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
+        <Modal.Body>Bạn có chắc rằng muốn xóa sản phẩm này?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+            Đóng
           </Button>
-          <Button variant="danger" onClick={() => deleted}>
+          <Button variant="danger" onClick={() => deleted(id)}>
             Xóa
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
       <div className="row">
         <div className="col-3 bg-white rounded-2 p-0 ms-5">
           <div className="w-100 sticky-top ">
@@ -154,25 +201,30 @@ export default function ProductList() {
           <div className="bg-white rounded-3 shadow-sm">
             <div className="row p-3">
               <div className="col-8 d-flex align-items-center justify-content-between w-100">
-                <div className="col-6 d-flex">
-                  {actions.map((action, index) =>
-                    action.link ? (
-                      <Link to={action.link} key={index}>
-                        <button className="btn btn-primary me-1">
-                          <FontAwesomeIcon icon={action.icon} /> {action.name}
-                        </button>
-                      </Link>
-                    ) : (
-                      <button
-                        role="button"
-                        key={index}
-                        className={`border-0 me-1 text-white px-2 bg-${action.bg}`}
-                      >
-                        <FontAwesomeIcon icon={action.icon} className="mr-0" />{" "}
-                        {action.name}
-                      </button>
-                    )
-                  )}
+              <div className="col-6 d-flex">
+                  <button
+                    role="button"
+                    onClick={checkAll}
+                    className={`border-0 me-1 py-1 text-white px-2 bg-success`}
+                  >
+                    <FontAwesomeIcon icon={faCheckDouble} className="mr-0" />{" "}
+                    Chọn tất cả
+                  </button>
+                  {checkList.length> 0 &&<button
+                    role="button"
+                    className={`border-0 me-1 py-1 text-white px-2 bg-danger`}
+                    onClick={deleteAll}
+                  >
+                    <FontAwesomeIcon icon={faTrash} className="mr-0" /> Xóa nhiều
+                  </button>}
+
+                  {checkList.length> 0 &&<button
+                    role="button"
+                    className={`border-0 me-1 py-1 text-white px-2 bg-danger`}
+                    onClick={activeAll}
+                  >
+                    <FontAwesomeIcon icon={faTrash} className="mr-0" /> Phê duyệt
+                  </button>}
                 </div>
                 <div className="col-6">
                   <MDBInputGroup className=" d-flex align-items-center">
@@ -191,6 +243,7 @@ export default function ProductList() {
             <Table striped bordered hover>
               <thead>
                 <tr className="border-underline">
+                  <th></th>
                   <th>Hình ảnh</th>
                   <th>Tên</th>
                   <th>Giá</th>
@@ -204,37 +257,32 @@ export default function ProductList() {
                 {products && products?.length > 0 ? (
                   products.map((product, index) => (
                     <tr key={index}>
-                      <td className="col-1">
-                        <img
-                          src={
-                            product && product.file.length > 0
-                              ? `http://localhost:8080/file/downloadFile/${product.file[0].id}`
-                              : "no image"
-                          }
-                          alt=""
-                          width="100px"
+                      <td>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          onChange={() => checked(product.idProduct)}
+                          checked={checkList.length > 0? checkList.includes(product.idProduct):false}
                         />
+                      </td>
+                      <td className="col-1">
+                        <img src={product.urlFile[0] } alt="" width="100px" />
                       </td>
                       <td>{product.productName}</td>
                       <td>{product.price}</td>
-                      <td>{product.quantity}</td>
+                      <td>{product.amount}</td>
                       <td>{product.date}</td>
                       <td>{product.tradePark}</td>
                       <td>
-                        <button type="button" className="btn btn-info me-2">
-                          <Link
-                            style={{ textDecoration: "none", color: "white" }}
-                            to={`/product/update/${product.idUser}`}
-                          >
-                            Update
-                          </Link>
+                        <button type="button" onClick={()=>accept(product.idProduct)} className="btn btn-info me-2">
+                          Phê duyệt
                         </button>
                         <button
                           type="button"
                           className="btn btn-danger"
-                          onClick={() => handleShow(product.idUser)}
+                          onClick={() => handleShow(product.idProduct)}
                         >
-                          Delete
+                          Xóa
                         </button>
                       </td>
                     </tr>

@@ -12,6 +12,9 @@ import UpdatePage from "../layout/UpdatePage";
 import AddproductPage from "../layout/Addproduct";
 import Adduser from "../layout/Adduser";
 import Posted from "../layout/Posted";
+import SellerManager from '../layout/AcceptOrder'
+import SellBill from "../layout/SellBill";
+import BillDetail from "../layout/BillDetail";
 
 //Public Routes
 export const publicRoutes = [
@@ -24,6 +27,9 @@ export const publicRoutes = [
   { path: "/user/update/:id", component: Adduser },
   { path: "/user/add", component: Adduser },
   { path: "/user/posted", component: Posted },
+  { path: "/sell/manager", component: SellerManager },
+  { path: "/sell/list", component: SellBill },
+  { path: "/sell/product", component: BillDetail },
   { path: "/carts", component: Carts },
   { path: "/sign-in", component: SignIn },
   { path: "/sign-up", component: SignUp },

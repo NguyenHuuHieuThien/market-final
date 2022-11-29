@@ -1,6 +1,6 @@
-import ImageGallery from "react-image-gallery";
+import ImageGallery from "../../component/ImageGalery";
 import { Row, Col } from "react-bootstrap";
-import { useState} from "react";
+import { useState, useRef } from "react";
 import { axiosx as axios } from "../../Helper";
 
 import Navbars from "../../component/Navbars";
@@ -8,9 +8,9 @@ import Footer from "../../component/Footer";
 import { useParams } from "react-router-dom";
 import province from "./../../Province/data.json";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSnackbar } from "notistack";
 import {
   faTruck,
-  faPlus,
   faCirclePlus,
   faCircleCheck,
   faCircleMinus,
@@ -18,67 +18,67 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect } from "react";
 // const images = [
-//   {
-//     original: "https://picsum.photos/id/1018/1000/600/",
-//     thumbnail: "https://picsum.photos/id/1018/250/150/",
-//   },
-//   {
-//     original: "https://picsum.photos/id/1015/1000/600/",
-//     thumbnail: "https://picsum.photos/id/1015/250/150/",
-//   },
-//   {
-//     original: "https://picsum.photos/id/1019/1000/600/",
-//     thumbnail: "https://picsum.photos/id/1019/250/150/",
-//   },
-//   {
-//     original: "https://picsum.photos/id/1019/1000/600/",
-//     thumbnail: "https://picsum.photos/id/1019/250/150/",
-//   },
+//   "https://cdn.tgdd.vn/Files/2016/08/31/881752/quoc-khanh-2-9-760-3671.jpg",
+//   "https://cdn.tgdd.vn/Files/2017/08/24/1015732/online-friday-760-367.png",
+//   "https://cdn.tgdd.vn/Files/2018/12/28/1141041/sam-tet-ruoc-loc-mung-nam-moi-2019-vo-van-uu-dai-hap-dan-tai-dien-may-xanh-760x367.png"
 // ];
 export default function DetailProduct() {
+  const inputRef = useRef(null);
+  const { enqueueSnackbar } = useSnackbar();
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
-  const [images, setImages] = useState([{original:'',thumbnail:'' }])
   const [products, setProducts] = useState([]);
   let provinces = Object.values(province);
   let [amount, setAmount] = useState(1);
   const [data, setData] = useState({});
-  const [image, setImage] = useState()
-  const [totalComment, setTotalComment] = useState(0)
-  // console.log(commentList)
+  const [image, setImage] = useState([]);
+  const [totalComment, setTotalComment] = useState(0);
+  const [isReply, setIsReply] = useState(false)
   let { id } = useParams();
-  let user = JSON.parse(localStorage.getItem('token'))
+  let user = JSON.parse(localStorage.getItem("token"));
+  console.log(image);
   const submit = (e) => {
     e.preventDefault();
-    let formData = new FormData()
-    formData.append('commentContent', comment)
-    formData.append("file1", image??new File([""], ""));
+    let formData = new FormData();
+    formData.append("commentContent", comment);
+    if (image && image.length > 0) {
+      for (let i = 0; i < image.length; i++) {
+        console.log(image[i]);
+        formData.append("files", image[i]);
+      }
+    } else {
+      formData.append("files", new File([""], ""));
+    }
+
     axios
-      .post(`/comment/insertCommentAndFile?idUser=${user.id}&idProduct=${id}`, formData,{
-        headers: {
-          "Content-Type": "multipart/form-data",
-        }}
-        )
+      .post(
+        `/comment/insertCommentAndMulFile?idUser=${user.id}&idProduct=${id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
       .then(() => {
-        console.log('success')
-        setTotalComment(totalComment+1)
+        enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
+        setTotalComment(totalComment + 1);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
   const addToCart = () => {
-    if(amount > data.amount){
-      alert('amount not enough')
-      return
+    if (amount > data.amount) {
+      enqueueSnackbar("Số lượng sản phẩm còn lại không đủ", {
+        variant: "error",
+      });
+      return;
     }
     axios
-      .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {amount:amount})
-      .then(() => {
-        console.log('success')
-        axios.put(`/product/update/${id}`,{...data, amount: data.amount - amount})
-        .then(()=>console.log('success'))
-        .catch(err=>console.log(err))
+      .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {
+        amount: amount,
       })
-      .catch((err) => console.log(err));
+      .then(() => enqueueSnackbar("Đã thêm vào giỏ", { variant: "success" }))
+      .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
   useEffect(() => {
     if (axios) {
@@ -94,8 +94,9 @@ export default function DetailProduct() {
       axios
         .get(`/comment/selectById/${id}`)
         .then((res) => {
-          setCommentList(res.data)
-          setTotalComment(res.data.length)
+          console.log(res.data);
+          setCommentList(res.data);
+          setTotalComment(res.data.length);
         })
         .catch((err) => console.log(err));
     }
@@ -107,13 +108,11 @@ export default function DetailProduct() {
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
           <Row>
             <Col md={6}>
-              <ImageGallery items={images} />
+              <ImageGallery images={data && data.urlFile ? data.urlFile : []} />
             </Col>
             <Col md={6}>
               <h2 className="mb-4">{data.productName}</h2>
-              <h3 className="mb-4">
-                Giá:{data && data.price}
-              </h3>
+              <h3 className="mb-4">Giá:{data && data.price}</h3>
               <div className="d-flex mb-5">
                 <div className="me-3">
                   <FontAwesomeIcon icon={faTruck} className="me-2" />
@@ -147,24 +146,26 @@ export default function DetailProduct() {
                     onClick={() => setAmount(amount + 1)}
                   />
                 </div>
-                <div className="form-text">{data&&data.amount > 0?data.amount:0} Số lượng có sẵn</div>
+                <div className="form-text">
+                  {data && data.amount > 0 ? data.amount : 0} Số lượng có sẵn
+                </div>
               </div>
               <div className="mt-4">
-                <button className="btn btn-primary me-3" onClick={addToCart}>
+                <button className="btn bg-spotlight me-3" onClick={addToCart}>
                   <FontAwesomeIcon icon={faCartPlus} className="me-2" />
                   Thêm vào giỏ hàng
                 </button>
-                <button className="btn btn-primary">Mua ngay</button>
+                <button className="btn btn-buy text-white">Mua ngay</button>
               </div>
             </Col>
           </Row>
         </div>
-        <div className="container d-flex align-items-center bg-white shadow-sm p-3 rounded-3 mt-3 text-start">
+        <div className="container d-flex align-items-center bg-spotlight shadow-sm p-3 rounded-3 mt-3 text-start">
           <div className="col-4">
             <div className="d-flex justify-content-start align-items-center border-right border-danger">
               <div className="me-3">
                 <img
-                  className="rounded-full"
+                  className="rounded-pill"
                   src="https://yt3.ggpht.com/XkcR_0_hNSF1QSORprbltUR23RyOSfnCUBYo0BEUwvAZrV2UVuY3ltSa5BukufP4oQEQ5cKN=s900-c-k-c0x00ffffff-no-rj"
                   width="80px"
                 />
@@ -175,36 +176,24 @@ export default function DetailProduct() {
               </div>
             </div>
           </div>
-          <div className="col-8">
+          <div className="col-8 d-none d-sm-none d-md-none d-lg-block d-xl-block">
             <div className="row">
-              <div className="col-4 mb-3">
+              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                 <div>
-                  <span className="me-3">Đánh giá</span>
-                  <span className="text-main">45,6k</span>
+                  <span className="me-3">Email</span>
+                  <span className="text-main">{user.email}</span>
                 </div>
               </div>
-              <div className="col-4 mb-3">
+              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                 <div>
-                  <span className="me-3">Đánh giá</span>
-                  <span className="text-main">45,6k</span>
+                  <span className="me-3">Tên</span>
+                  <span className="text-main">{user.name}</span>
                 </div>
               </div>
-              <div className="col-4 mb-3">
+              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                 <div>
-                  <span className="me-3">Đánh giá</span>
-                  <span className="text-main">45,6k</span>
-                </div>
-              </div>
-              <div className="col-4 mb-3">
-                <div>
-                  <span className="me-3">Đánh giá</span>
-                  <span className="text-main">45,6k</span>
-                </div>
-              </div>
-              <div className="col-4 mb-3">
-                <div>
-                  <span className="me-3">Đánh giá</span>
-                  <span className="text-main">45,6k</span>
+                  <span className="me-3">SĐT</span>
+                  <span className="text-main">{user.phoneNumber}</span>
                 </div>
               </div>
             </div>
@@ -217,14 +206,21 @@ export default function DetailProduct() {
               <div className="mb-5">
                 <div>{data.productName}</div>
                 <div className="mt-3">
-                    {data.description && data.description.replace(/-/g, '').replace(/\r/g, '').split('\n').filter(item=> item !== "").map(item=>
-                      <div className="mb-3">
-                      <FontAwesomeIcon
-                        icon={faCircleCheck}
-                        className="me-2 text-success"
-                      />
-                      {item}
-                    </div>)}
+                  {data.description &&
+                    data.description
+                      .replace(/-/g, "")
+                      .replace(/\r/g, "")
+                      .split("\n")
+                      .filter((item) => item !== "")
+                      .map((item) => (
+                        <div className="mb-3">
+                          <FontAwesomeIcon
+                            icon={faCircleCheck}
+                            className="me-2 text-success"
+                          />
+                          {item}
+                        </div>
+                      ))}
                 </div>
               </div>
               <div>
@@ -286,23 +282,29 @@ export default function DetailProduct() {
                 encType="multipart/form-data"
                 onSubmit={(e) => submit(e)}
               >
-                <div class="form-floating mb-3">
+                <div class="input-group mb-3">
                   <input
-                    class="form-control w-50"
-                    id="floatingInput"
                     type="text"
-                    // value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="name@example.com"
+                    class="form-control"
+                    placeholder="Nhập đánh giá..."
+                    aria-describedby="button-addon2"
                   />
-                  <label for="floatingInput">Nhập đánh giá...</label>
+                  <label className="btn btn-outline-success" htmlFor="files">
+                      <span>Thêm hình</span>
+                  </label>
                 </div>
-                <div class="form-floating mb-3">
-                  <input
-                    type="file"
-                    onChange={e => setImage(e.target.files[0])}
-                  />
-                </div>
+                <input
+                  ref={inputRef}
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  id="files"
+                  multiple
+                  type="file"
+                  onChange={(e) => {
+                    setImage(e.target.files);
+                  }}
+                />
                 <div>
                   <button type="submit" className="btn btn-success rounded-1">
                     Bình luận
@@ -312,7 +314,7 @@ export default function DetailProduct() {
             </div>
             {commentList &&
               commentList.length > 0 &&
-              commentList.map((item,index) => (
+              commentList.map((item, index) => (
                 <div key={index} className="mt-5">
                   <div className="d-flex">
                     <div className="me-3">
@@ -324,10 +326,18 @@ export default function DetailProduct() {
                     <div>
                       <div className="fw-bold">Hua Khai</div>
                       <div className="form-text">
-                        2022-10-10 14:28 | Phân loại hàng: {data.category && data.category.categoryName}
+                        2022-10-10 14:28 | Phân loại hàng:{" "}
+                        {data.category && data.category.categoryName}
                       </div>
                       <div className="w-50">
                         <span>{item.comment}</span>
+                      </div>
+                      <div className="d-flex">
+                        {item.urlFile.map((item) => (
+                          <div style={{ width: "100px", height: "100px" }}>
+                            <img src={item} width="100%" height="100%" />
+                          </div>
+                        ))}
                       </div>
                       <div className="d-flex">
                         <a
@@ -336,13 +346,49 @@ export default function DetailProduct() {
                         >
                           Thích
                         </a>
-                        <a
+                        <a onClick={()=> setIsReply(!isReply)}
                           role="button"
                           className="form-text text-decoration-none"
                         >
                           Phản hồi
                         </a>
                       </div>
+                      {isReply &&
+                      <form
+                      className="w-100"
+                      encType="multipart/form-data"
+                      onSubmit={(e) => submit(e)}
+                    >
+                      <div class="input-group mb-3">
+                        <input
+                          type="text"
+                          onChange={(e) => setComment(e.target.value)}
+                          class="form-control"
+                          placeholder="Nhập đánh giá..."
+                          aria-describedby="button-addon2"
+                        />
+                        <label className="btn btn-outline-success" htmlFor="files">
+                            <span>Thêm hình</span>
+                        </label>
+                      </div>
+                      <input
+                        ref={inputRef}
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        id="files"
+                        multiple
+                        type="file"
+                        onChange={(e) => {
+                          setImage(e.target.files);
+                        }}
+                      />
+                      <div>
+                        <button type="submit" className="btn btn-success rounded-1">
+                          Bình luận
+                        </button>
+                      </div>
+                    </form>
+                      }
                     </div>
                   </div>
                 </div>
@@ -367,14 +413,14 @@ export default function DetailProduct() {
                               width="100%"
                             />
                           </div>
-                          <div className="px-3 pb-2 mt-2 text-start">
+                          <div className="px-3 text-center pb-2 mt-2 text-start">
                             <div style={{ fontSize: "14px" }}>
                               {item.productName}
                             </div>
-                            <div className="d-flex justify-content-between">
-                              <div className="text-main">{item.price}</div>
-                              <div className="form-text">đã bán 968</div>
-                            </div>
+                            {/* <div className="d-flex justify-content-between"> */}
+                              <div style={{ fontSize: "12px" }}>Giá: <span  className="text-main text-xs">{item.price.toLocaleString()} VND</span></div>
+                              <div className="form-text" style={{ fontSize: "12px" }}><span className={item.amount ==0? 'text-danger': ''}>{item.amount>0? `Còn lại: ${item.amount}`: 'Hết Hàng'}</span></div>
+                            {/* </div> */}
                           </div>
                         </div>
                       </div>

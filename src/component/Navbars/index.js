@@ -16,16 +16,11 @@ import {
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import NavDropdown from "react-bootstrap/NavDropdown";
-import { useEffect, useState } from "react";
 import Tippy from "@tippyjs/react/headless";
 import "tippy.js/dist/tippy.css"; // optional
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 export default function Navbars() {
-  const token = localStorage.getItem("token");
-  const isUser = false;
-  const navigation = useNavigate();
   const menu = {
     menu1: [
       {
@@ -62,10 +57,6 @@ export default function Navbars() {
       },
     ],
   };
-  const logout = () => {
-    localStorage.clear();
-    navigation(["/login"]);
-  };
   const userMenu = [
     {
       name: "Trang cá nhân",
@@ -73,14 +64,14 @@ export default function Navbars() {
       link: "/user/profile",
     },
     {
-      name: "Đi tới Admin",
-      link: "/admin/users",
-      icon: faHome,
-    },
-    {
       name: "Đăng bài",
       icon: faPenToSquare,
       link: "/product/add",
+    },
+    {
+      name: "Sản phẩm đã đăng",
+      icon: faPenToSquare,
+      link: "/sell/manager",
     },
     {
       name: "Bài viết đã đăng",
@@ -90,11 +81,12 @@ export default function Navbars() {
     {
       name: "Đăng xuất",
       icon: faRightFromBracket,
-      function: function () {
+      logout: function () {
         localStorage.clear();
       },
     },
   ];
+  let user = JSON.parse(localStorage.getItem('token'))
 
   return (
     <div>
@@ -115,7 +107,7 @@ export default function Navbars() {
                     <Tippy
                     key={index}
                       interactive
-                      placement="bottom"
+                      placement="bottom"  
                       render={(attrs) => (
                         <div
                           className="box bg-white py-2 sticky-top shadow-sm rounded-2"
@@ -225,7 +217,7 @@ export default function Navbars() {
                 )}
               </Nav>
               <Nav>
-                {token ? (
+                {user ? (
                   <div className="nav-profile">
                     <Tippy
                       interactive
@@ -237,12 +229,25 @@ export default function Navbars() {
                           tabIndex="-1"
                           {...attrs}
                         >
-                          {userMenu.map((item, index) => (
-                            <Link
-                              key={index}
+
+                            {user.roles[0]==="ROLE_ADMIN"&& 
+                            <Link to="/admin/users"
+                            style={{ textDecoration: "none" }}
+                          >
+                            <div className="nav-profile-detail-item py-2 text-start">
+                              <FontAwesomeIcon
+                                icon={faHome}
+                                className="me-2"
+                              />
+                              Đi tới Admin
+                            </div>
+                          </Link>}
+                          {userMenu.map((item, index)=>
+                            <Link                            
                               to={item.link}
-                              onClick={item?.function}
+                              onClick={item?.logout}
                               style={{ textDecoration: "none" }}
+                              key={index}
                             >
                               <div className="nav-profile-detail-item py-2 text-start">
                                 <FontAwesomeIcon
@@ -251,15 +256,14 @@ export default function Navbars() {
                                 />
                                 {item.name}
                               </div>
-                            </Link>
-                          ))}
+                            </Link>)}                                          
                         </div>
                       )}
                     >
                       <div className="d-flex justify-content-center align-items-center">
                         <div className="me-3">
                           <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/c/cd/Jujingyi-_C%C3%BAc_T%E1%BB%B7.jpg"
+                            src={user.fileList[0].fileDownloadUri}
                             width="50px"
                             height="50px"
                             className="rounded-pill"
@@ -273,10 +277,10 @@ export default function Navbars() {
                   </div>
                 ) : (
                   menu.menu2.map((item, index) => (
-                    <Nav.Link key={index} href={item.link}>
+                    <Link key={index} to={item.link}>
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
-                    </Nav.Link>
+                    </Link>
                   ))
                 )}
               </Nav>
