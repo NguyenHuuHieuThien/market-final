@@ -8,7 +8,10 @@ export default function Posted() {
   let user = JSON.parse(localStorage.getItem('token'))
   useEffect(()=>{
     axios.get(`/product/findByIdUserSalesman/${user.id}?status=active`)
-    .then(res=>setData(res.data))
+    .then(res=>{
+      setData(res.data)
+      console.log(res.data)
+    })
     .catch(err=> console.log(err))
   },[])
   return (
@@ -21,7 +24,7 @@ export default function Posted() {
           <div key={index} className="row mb-3 p-2 bg-white">
           <div className="col-3">
             <img
-              src="https://cdn.tgdd.vn/Products/Images/2403/252243/chao-nhom-chong-dinh-delites-ce007-28-211021-113001-600x600.png"
+              src={item.urlFile[0]}
               className="w-100"
             />
           </div>

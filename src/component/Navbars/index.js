@@ -12,6 +12,7 @@ import {
   faUserPlus,
   faClipboardList,
   faRightFromBracket,
+  faCheck
 } from "@fortawesome/free-solid-svg-icons";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
@@ -69,8 +70,8 @@ export default function Navbars() {
       link: "/product/add",
     },
     {
-      name: "Sản phẩm đã đăng",
-      icon: faPenToSquare,
+      name: "Phê duyệt đơn hàng",
+      icon: faCheck,
       link: "/sell/manager",
     },
     {
@@ -83,6 +84,9 @@ export default function Navbars() {
       icon: faRightFromBracket,
       logout: function () {
         localStorage.clear();
+        setTimeout(() => {
+          window.location.href = "/"
+        }, 1000);
       },
     },
   ];
@@ -234,10 +238,10 @@ export default function Navbars() {
                             <Link to="/admin/users"
                             style={{ textDecoration: "none" }}
                           >
-                            <div className="nav-profile-detail-item py-2 text-start">
+                            <div className="nav-profile-detail-item text-black py-2 text-start">
                               <FontAwesomeIcon
                                 icon={faHome}
-                                className="me-2"
+                                className="me-4"
                               />
                               Đi tới Admin
                             </div>
@@ -246,13 +250,13 @@ export default function Navbars() {
                             <Link                            
                               to={item.link}
                               onClick={item?.logout}
-                              style={{ textDecoration: "none" }}
+                              style={{ textDecoration: "none"}}
                               key={index}
                             >
-                              <div className="nav-profile-detail-item py-2 text-start">
+                              <div className="nav-profile-detail-item py-2 text-black text-start">
                                 <FontAwesomeIcon
                                   icon={item.icon}
-                                  className="me-2"
+                                  className="me-4"
                                 />
                                 {item.name}
                               </div>
@@ -277,7 +281,7 @@ export default function Navbars() {
                   </div>
                 ) : (
                   menu.menu2.map((item, index) => (
-                    <Link key={index} to={item.link}>
+                    <Link key={index} style={{ textDecoration: "none"}} className="text-white me-3" to={item.link}>
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
                     </Link>

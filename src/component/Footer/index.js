@@ -12,7 +12,7 @@ const footerList1 = [
 const footerList2 = [
  {name: 'Đăng bài', link: '/product/add'},
  {name: 'Liên hệ', link: '/'},
- {name: 'Tài khoản', link: 'user/profile'},
+ {name: 'Tài khoản', link: '/user/profile'},
   
 ]
 export default function Footer() {

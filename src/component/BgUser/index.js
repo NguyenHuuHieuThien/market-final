@@ -28,6 +28,7 @@ import {
   faTelevision,
   faBarsProgress,
   faListCheck,
+  faCheck
 } from "@fortawesome/free-solid-svg-icons";
 import { Link,useLocation } from "react-router-dom";
 import { Collapse } from "react-bootstrap";
@@ -41,9 +42,11 @@ const profileMenu = [
   { name: "Trang cá nhân", link: "/user/profile", icon: faUser },
   { name: "Xem sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Sản phẩm đã đăng", link: "/sell/list", icon: faListCheck },
-  { name: "Quản lý sản phẩm", link: "/sell/manager", icon: faBarsProgress },
+  { name: "Phê duyệt đơn hàng", link: "/sell/manager", icon: faCheck },
   { name: "Đăng bài", link: "/product/add", icon: faEdit },
-  { name: "Đăng xuất", link: "/", icon: faRightFromBracket, logout: function(){localStorage.clear()} },
+  { name: "Đăng xuất", link: "/", icon: faRightFromBracket, logout: function(){ setTimeout(() => {
+    window.location.href = "/"
+  }, 1000);} },
 ];
 export default function BgUser({ children }) {
   const [open, setOpen] = useState(false);
@@ -52,6 +55,12 @@ export default function BgUser({ children }) {
   let location  = useLocation()
   let path = location.pathname.includes('profile')
   let user = JSON.parse(localStorage.getItem('token'))
+  const logout= ()=>{
+    localStorage.clear()
+    setTimeout(() => {
+      window.location.href = "/"
+    }, 1000);
+  }
   return (
     <div className="bg-main">
       <ModalReact
@@ -88,7 +97,7 @@ export default function BgUser({ children }) {
                     to={item.link}
                     key={index}
                     onClick={item?.logout}
-                    className="text-decoration-none text-black"
+                    className={`text-decoration-none text-black ${(item.name === 'Sản phẩm đã đăng' ||item.name === 'Phê duyệt đơn hàng'||item.name === 'Đăng bài' )&&user.roles[0]==="ROLE_USER"&&"d-none"}`}
                   >
                     <div className="d-flex justify-content-between p-3 hover mb-3">
                       <span>
@@ -120,7 +129,7 @@ export default function BgUser({ children }) {
                   Đổi mật khẩu
                 </button>
               </div>
-              <button className="btn btn-danger rounded-5">Đăng xuất</button>
+              <button onClick={logout} className="btn btn-danger rounded-5">Đăng xuất</button>
             </div>
             <div className="p-3 mb-3 shadow-sm">{children}</div>
           </MDBContainer>

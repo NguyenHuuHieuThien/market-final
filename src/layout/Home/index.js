@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { axiosx} from "./../../Helper";
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
+import Spinner from "../../component/Spinner";
 import SlideShow from "../../component/SlideShow";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,6 +10,7 @@ import { Link } from "react-router-dom";
 export default function HomePage() {
   const [category, setCategory] = useState([]);
   const [product, setProduct] = useState();
+  const [isLoading, setIsloading] = useState(false)
 
   useEffect(() => {
     console.log(axiosx)
@@ -69,7 +71,7 @@ export default function HomePage() {
           <div>
             <div className="row mt-2 p-2">
               {product &&
-                product.length > 0 &&
+                product.length > 0 ?
                 product.map((item, index) => (
                   <div
                     key={index}
@@ -96,7 +98,7 @@ export default function HomePage() {
                       </Link>
                     </div>
                   </div>
-                ))}
+                )) : <Spinner/>}
             </div>
           </div>
         </div>
@@ -109,7 +111,7 @@ export default function HomePage() {
           <div>
             <div className="row mt-2 p-2">
               {product &&
-                product.length > 0 &&
+                product.length > 0 ?
                 product.map((item, index) => (
                   <div
                     key={index}
@@ -136,7 +138,7 @@ export default function HomePage() {
                       </Link>
                     </div>
                   </div>
-                ))}
+                )):<Spinner/>}
             </div>
           </div>
         </div>

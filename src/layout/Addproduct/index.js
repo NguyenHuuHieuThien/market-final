@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { axiosx as axios } from "../../Helper";
 import { useSnackbar } from "notistack"
 import BgUser from "../../component/BgUser";
@@ -19,6 +19,7 @@ export default function AddproductPage() {
   });
   const [categories, setCategories] = useState([]);
   const [idcategory, setIdCategory] = useState(1);
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('token'))
   useEffect(() => {
     if (axios) {
@@ -84,6 +85,7 @@ export default function AddproductPage() {
         })
         .then((res) => {
           enqueueSnackbar('Thêm sản phẩm thành công', {variant: 'success'})
+          navigate('/product/list')
         })
         .catch(()=>enqueueSnackbar('Thêm sản phẩm thất bại', {variant: 'error'}))
     }

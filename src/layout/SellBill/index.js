@@ -21,8 +21,8 @@ export default function SellBill() {
       axios
         .get(`/product/findByIdUserSalesman/${user.id}?status=active`)
         .then((res) => {
-          setSellList(res.data)
-          console.log(res.data)
+          setSellList(res.data);
+          console.log(res.data);
         })
         .catch((err) => console.log(err));
     }
@@ -62,11 +62,17 @@ export default function SellBill() {
     setSellList(sellList.filter((item) => item.id !== id));
   };
   return (
-    <BgUser>
-      <h1 className=" bg-white py-5 rounded-3 border-underline">
-        Sản phẩm đã đăng
-      </h1>
-      {/* <div className="col-6 d-flex">
+    <div>
+      {user.roles[0] === "ROLE_USER" ? (
+        <div class="alert alert-danger" role="alert">
+          Bạn không có quyền truy cập
+        </div>
+      ) : (
+        <BgUser>
+          <h1 className=" bg-white py-5 rounded-3 border-underline">
+            Sản phẩm đã đăng
+          </h1>
+          {/* <div className="col-6 d-flex">
                   <button
                     role="button"
                     onClick={checkAll}
@@ -83,23 +89,23 @@ export default function SellBill() {
                     <FontAwesomeIcon icon={faTrash} className="mr-0" /> Xóa nhiều
                   </button>
                 </div> */}
-      <div className="mt-3 bg-white rounded-3 shadow-sm">
-        <Table striped bordered hover>
-          <thead>
-            <tr className="border-underline">
-              {/* <th></th> */}
-              <th>Hình ảnh</th>
-              <th>Tên</th>
-              <th>Giá</th>
-              <th>Số Lượng</th>
-              <th>Thao Tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sellList && sellList?.length > 0 ? (
-              sellList.map((item, index) => (
-                <tr key={index}>
-                  {/* <td>
+          <div className="mt-3 bg-white rounded-3 shadow-sm">
+            <Table striped bordered hover>
+              <thead>
+                <tr className="border-underline">
+                  {/* <th></th> */}
+                  <th>Hình ảnh</th>
+                  <th>Tên</th>
+                  <th>Giá</th>
+                  <th>Số Lượng</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sellList && sellList?.length > 0 ? (
+                  sellList.map((item, index) => (
+                    <tr key={index}>
+                      {/* <td>
                         <input
                           className="form-check-input"
                           type="checkbox"
@@ -107,32 +113,34 @@ export default function SellBill() {
                           checked={checkList.includes(item.idProduct)}
                         />
                       </td> */}
-                  <td className="col-1">
-                    <img src={item.urlFile[0] } alt="" width="100px" />
-                  </td>
-                  <td>{item.productName}</td>
-                  <td>{item.price}</td>
-                  <td>{item.amount}</td>
-                  <td>
-                    <Link to={`/sell/product/${item.idProduct}`}>
-                      <button type="button" className="btn btn-info me-2">
-                        Xem đơn hàng
-                      </button>
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8">
-                  Chưa có bài đăng nào.
-                  <Link to="/sign-up">Tạo mới một bài đăng người dùng</Link>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-      </div>
-    </BgUser>
+                      <td className="col-1">
+                        <img src={item.urlFile[0]} alt="" width="100px" />
+                      </td>
+                      <td>{item.productName}</td>
+                      <td>{item.price}</td>
+                      <td>{item.amount}</td>
+                      <td>
+                        <Link to={`/sell/product/${item.idProduct}`}>
+                          <button type="button" className="btn btn-info me-2">
+                            Xem đơn hàng
+                          </button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8">
+                      Chưa có bài đăng nào.
+                      <Link to="/sign-up">Tạo mới một bài đăng người dùng</Link>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </BgUser>
+      )}
+    </div>
   );
 }

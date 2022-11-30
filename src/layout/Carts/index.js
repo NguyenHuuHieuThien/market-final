@@ -62,7 +62,6 @@ export default function Carts() {
         <Table striped bordered hover>
           <thead>
             <tr className="border-underline">
-              <th>STT</th>
               <th>Hình ảnh</th>
               <th>Tên sản phẩm</th>
               <th>Số lượng</th>
@@ -73,7 +72,7 @@ export default function Carts() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td>
+                <td colSpan={5}>
                   <div className="spinner-border text-danger" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
@@ -82,7 +81,6 @@ export default function Carts() {
             ) : data.length > 0 ? (
               data.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.id}</td>
                   <td>
                     <img
                       src={

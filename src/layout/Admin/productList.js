@@ -150,7 +150,7 @@ export default function ProductList() {
   }
   return (
     <div className="mt-4 bg-main">
-      {/* <Modal
+      <Modal
         show={show}
         onHide={handleClose}
         backdrop="static"
@@ -168,7 +168,7 @@ export default function ProductList() {
             Xóa
           </Button>
         </Modal.Footer>
-      </Modal> */}
+      </Modal>
       <div className="row">
         <div className="col-3 bg-white rounded-2 p-0 ms-5">
           <div className="w-100 sticky-top ">
@@ -220,7 +220,7 @@ export default function ProductList() {
 
                   {checkList.length> 0 &&<button
                     role="button"
-                    className={`border-0 me-1 py-1 text-white px-2 bg-danger`}
+                    className={`border-0 me-1 py-1 text-white px-2 bg-success`}
                     onClick={activeAll}
                   >
                     <FontAwesomeIcon icon={faTrash} className="mr-0" /> Phê duyệt
