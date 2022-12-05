@@ -58,15 +58,15 @@ export default function Footer() {
                 className="col-12 text-center col-sm-12 text-sm-center col-md-12 text-md-center col-lg-6 text-lg-start col-xl-6 text-xl-start text-white">
                 <div className="mb-4">
                   <i className="fa-solid fa-phone me-3"></i>
-                  <span>(+1)650-755-2969</span>
+                  <a href='tel:+941549525' className='text-decoration-none text-white'>+(84)0941549525</a>
                 </div>
                 <div className="mb-4">
                   <i className="fa-solid fa-envelope me-3"></i>
-                  <span>office@anty.app</span>
+                  <a href='mailto:oldmarket2022@gmail.com' className='text-decoration-none text-white'>oldmarket2022@gmail.com</a>
                 </div>
                 <div>
                   <i className="fa-solid fa-location-dot me-3"></i>
-                  <span>299 judah St, CA 94122</span>
+                  <a className='text-decoration-none text-white' href="https://www.facebook.com/hieuthien1770/">Fanpage</a>
                 </div>
               </div>
             </div>
@@ -74,11 +74,11 @@ export default function Footer() {
         </div>
         <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex justify-content-between text-white text-center py-5">
           <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex">
-            <div className="mb-3"><span className="me-3 form-text">@2022 Old Market. All Rights Reserved</span></div>
+            <div className="mb-3"><span className="me-3 form-text">@2022 Old Market. Đã đăng ký bản quyền</span></div>
             <div className="mb-3"><a href="" className="text-decoration-none">
-              <span className="me-3 form-text text-hover"></span>terms of Service</a></div>
+              <span className="me-3 form-text text-hover"></span>Dịch vụ</a></div>
             <div className="mb-3"><a href="" className="text-decoration-none">
-              <span className="me-3 form-text text-hover"></span>Privacy Policy</a></div>
+              <span className="me-3 form-text text-hover"></span>Bảo mật</a></div>
           </div>
           <div className="d-flex justify-content-center">
             <div>

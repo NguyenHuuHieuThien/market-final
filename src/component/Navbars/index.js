@@ -77,7 +77,7 @@ export default function Navbars() {
     {
       name: "Bài viết đã đăng",
       icon: faClipboardList,
-      link: "/user/poster",
+      link: "/user/posted",
     },
     {
       name: "Đăng xuất",
@@ -104,14 +104,16 @@ export default function Navbars() {
               />
             </Link>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse id="responsive-navbar-nav">
-              <Nav className="me-auto">
+            <Navbar.Collapse id="responsive-navbar-nav"  className="text-start">
+              <Nav className="me-auto ms-3">
                 {menu.menu1.map((item, index) =>
                   item.name === "Thông báo" ? (
+                    <div className="mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0" key={index}>
+
                     <Tippy
                     key={index}
                       interactive
-                      placement="bottom"  
+                      placement="bottom"
                       render={(attrs) => (
                         <div
                           className="box bg-white py-2 sticky-top shadow-sm rounded-2"
@@ -204,6 +206,7 @@ export default function Navbars() {
                         <span className="text-white ms-2">{item.name}</span>
                       </div>
                     </Tippy>
+                    </div>
                   ) : (
                     <Link
                       key={index}
@@ -213,6 +216,7 @@ export default function Navbars() {
                         color: "white",
                         marginRight: "10px",
                       }}
+                      className='mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0'
                     >
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
@@ -264,7 +268,7 @@ export default function Navbars() {
                         </div>
                       )}
                     >
-                      <div className="d-flex justify-content-center align-items-center">
+                      <div className="d-flex ms-3 mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0 justify-content-sm-start justify-content-md-start justify-content-lg-center justify-content-xl-center align-items-center">
                         <div className="me-3">
                           <img
                             src={user.fileList[0].fileDownloadUri}

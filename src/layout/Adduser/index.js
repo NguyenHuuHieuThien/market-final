@@ -58,6 +58,7 @@ function Adduser() {
       axios
         .put(`/user/update/${id}`, dataUpdate)
         .then(() => {
+          localStorage.setItem('userInfo', JSON.stringify(dataUpdate))
           enqueueSnackbar('Cập nhật thành công', {variant:'success'})
           navigate("/user/profile");
         })
@@ -82,11 +83,11 @@ function Adduser() {
           },
         })
         .then(() => {
-          alert("Tạo người dùng thành công");
+          enqueueSnackbar('Tạo người dùng thành công', {variant: 'success'})
           navigate("/admin/users");
         })
         .catch((error) => {
-          console.log(error);
+          enqueueSnackbar('Tạo người dùng thất bại', {variant: 'error'})
         });
     }
   };
@@ -262,7 +263,7 @@ function Adduser() {
                   required
                   onChange={(e) => handle(e)}
                   value={dataUpdate ? dataUpdate.password : ""}
-                  type="text"
+                  type="password"
                   placeholder="Nhập mật khẩu.."
                   class="form-control "
                   id="password"

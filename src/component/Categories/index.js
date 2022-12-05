@@ -1,27 +1,34 @@
-import {useEffect, useState} from 'react'
-import { axiosx as axios } from '../../Helper';
-function Category({selectCategory,allCategory ,getCategories}) {
-    const [categories, setCategories] = useState([])
-    useEffect(()=>{
-       if(axios){
-        axios.get('/category/searchAll')
-        .then(res=> setCategories(res.data))
-        .catch(err=>console.log(err))
-       }
-    },[])
-    const sendCategories = (() =>{
-        getCategories(categories)
-    })()
-    return ( 
-        <ul className='d-flex list-unstyled gap-2 mt-3'>
-            <li className='border border-primary' role="button" onClick={allCategory}><a className='text-xs text-decoration-none p-2'>Tất cả sản phẩm</a></li>
-        {categories.length > 0 && categories.map((category, index) =>
-            <li key={category.idCategory} onClick={() => selectCategory(category.idCategory)} className='border border-primary' role="button">
-                <a className='text-xs text-decoration-none p-2'>{category.categoryName}</a>
-            </li>
-        )}
-    </ul>
-     );
+import { useEffect, useState } from "react";
+import { axiosx as axios } from "../../Helper";
+function Category({ selectCategory, allCategory, getCategories }) {
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    if (axios) {
+      axios
+        .get("/category/searchAll")
+        .then((res) => setCategories(res.data))
+        .catch((err) => console.log(err));
+    }
+  }, []);
+  const sendCategories = (() => {
+    getCategories(categories);
+  })();
+  return (
+    <div className="row">
+    {categories &&
+      categories.length > 0 &&
+      categories.map((item,index) => (
+        <div
+         key={index}
+          className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
+        >
+          <div className="category-color pe-2">
+            <span>{item.categoryName}</span>
+          </div>
+        </div>
+      ))}
+  </div>
+  );
 }
 
 export default Category;

@@ -25,21 +25,19 @@ export default function ProductPage() {
   const [categoryName, setCategoryName] = useState([]);
   useEffect(() => {
     setIsLoading(true);
-    if (axiosx) {
-      axiosx
-        .get("/product/selectAll")
+    axios
+        .get("http://localhost:8080/product/selectAll")
         .then((res) => {
           setProductList(res.data.filter(item=> item.status === 'active'));
           setProductCategory(res.data.filter(item=> item.status === 'active'))
           setIsLoading(false);
         })
         .catch((err) => console.log(err));
-    }
   }, []);
   console.log(productCategory);
   const selectCategory = (id) => {
     setIsLoading(true);
-    axiosx
+    axios
       .get(`http://localhost:8080/category/search/${id}`)
       .then((res) => {
         console.log(res.data);
@@ -111,8 +109,8 @@ export default function ProductPage() {
         </Row>
         <Row>
           {isLoading ? (
-            <div class="spinner-border text-danger" role="status">
-              <span class="visually-hidden">Loading...</span>
+            <div className="spinner-border text-danger" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           ) : (
             productCategory.map((product, index) => (
@@ -144,12 +142,12 @@ export default function ProductPage() {
                           >
                             {product.categoryName}
                           </Badge>
-                          <Badge bg="warning">Price</Badge>
-                          {product.price}$
+                          <Badge bg="warning">Giá: </Badge>
+                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                         </Typography>
                         <Typography
                           variant="body2"
-                          className="limit-text"
+                          className="limit-text fs-13"
                           color="text.secondary"
                         >
                           {product.description}

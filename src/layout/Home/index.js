@@ -7,36 +7,35 @@ import SlideShow from "../../component/SlideShow";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import axios from "axios";
 export default function HomePage() {
   const [category, setCategory] = useState([]);
   const [product, setProduct] = useState();
-  const [isLoading, setIsloading] = useState(false)
 
   useEffect(() => {
-    console.log(axiosx)
-      if(axiosx){
-       axiosx
-      .get("/category/searchAll")
+       axios
+      .get("http://localhost:8080/category/searchAll")
       .then((res) => {
         console.log(res.data);
         setCategory(res.data);
       })
       .catch((err) => console.log(err));
-      axiosx
-      .get("/product/selectAll")
+      axios
+      .get("http://localhost:8080/product/selectAll")
       .then((res) => {
         console.log(res.data);
         setProduct(res.data.filter(item=> item.status === 'active'));
       })
       .catch((err) => console.log(err));
-      }
 
   }, []);
   return (
     <div>
       <Navbars position="sticky-top" />
       <div className="container mt-4 bg-white shadow-sm rounded-3 p-4">
-        <SlideShow />
+       <div>
+       <SlideShow />
+       </div>
         <div className="mt-5">
           <h2>Danh mục</h2>
           <div>
@@ -45,16 +44,10 @@ export default function HomePage() {
                 category.length > 0 &&
                 category.map((item) => (
                   <div
-                    key={item.idCategory}
-                    className="col category-color d-flex align-items-center justify-content-center text-white  m-2"
+                   key={item.idCategory}
+                    className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
                   >
-                    <div>
-                      {/* <div>
-                        <img
-                          src="https://cf.chợ cũ.vn/file/687f3967b7c2fe6a134a2c11894eea4b_tn"
-                          width="150px"
-                        />
-                      </div> */}
+                    <div className="category-color pe-2">
                       <span>{item.categoryName}</span>
                     </div>
                   </div>
@@ -69,30 +62,30 @@ export default function HomePage() {
         </h2>
         <div>
           <div>
-            <div className="row mt-2 p-2">
+            <div className="row mt-2 p-1">
               {product &&
                 product.length > 0 ?
                 product.map((item, index) => (
                   <div
                     key={index}
-                    className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3"
+                    className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
                   >
                     <div className="bg-white border-main">
                       <Link
                         to={`/product/${item.idProduct}`}
                         style={{ textDecoration: "none" }}
                       >
-                        <div className="">
+                        <div className="w-100">
                           <img
                             src={item.urlFile[0]}
                             style={{ width: "100%", height: "155px" }}
                           />
                         </div>
-                        <div className="px-3 pb-2 mt-2 text-center">
-                          <div style={{ fontSize: "14px" }}>
+                        <div className="px-3 pb-2 mt-2 text-center text-black">
+                          <div style={{ fontSize: "12px" }}>
                             {item.productName}
                           </div>
-                          <div className="text-main fs-13">{item.price}VND</div>
+                          <div className="text-main fs-13">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</div>
                           <div className="form-text">Còn {item.amount}</div>
                         </div>
                       </Link>
@@ -109,13 +102,13 @@ export default function HomePage() {
         </h2>
         <div>
           <div>
-            <div className="row mt-2 p-2">
+            <div className="row mt-2 p-1">
               {product &&
                 product.length > 0 ?
                 product.map((item, index) => (
                   <div
                     key={index}
-                    className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3"
+                    className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
                   >
                     <div className="bg-white border-main">
                       <Link
@@ -129,7 +122,7 @@ export default function HomePage() {
                           />
                         </div>
                         <div className="px-3 pb-2 mt-2 text-center">
-                          <div style={{ fontSize: "14px" }}>
+                          <div style={{ fontSize: "12px" }}>
                             {item.productName}
                           </div>
                           <div className="text-main fs-13">{item.price}VND</div>

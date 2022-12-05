@@ -1,8 +1,11 @@
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
-import BgUser from "../../component/BgUser";
+import BgUser from "../../component/BgUser";  
 import { axiosx as axios } from "../../Helper";
 import {useState, useEffect} from 'react'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {faArrowLeft} from '@fortawesome/free-solid-svg-icons'
+import {Link} from 'react-router-dom'
 export default function Posted() {
   const [data, setData] = useState([]);
   let user = JSON.parse(localStorage.getItem('token'))
@@ -15,7 +18,21 @@ export default function Posted() {
     .catch(err=> console.log(err))
   },[])
   return (
-    <BgUser>
+    <div>
+      {!user || user.roles[0]==="ROLE_USER"?
+       <div>
+       <div class="alert alert-danger" role="alert">
+         Bạn không có quyền truy cập vào trang này.
+       </div>
+       <Link to="/">
+         <button className="btn btn-warning text-white">
+           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
+           Quay lại
+         </button>
+       </Link>
+     </div>
+      :
+      <BgUser>
       <h1 className=" bg-white py-5 rounded-3 border-underline">
         Sản phẩm đã đăng
       </h1>
@@ -39,5 +56,7 @@ export default function Posted() {
         </div>)}
       </div>
     </BgUser>
+      }
+    </div>
   );
 }

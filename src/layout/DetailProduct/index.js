@@ -63,6 +63,7 @@ export default function DetailProduct() {
       .then(() => {
         enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
         setTotalComment(totalComment + 1);
+        setImage(new File([""], ""))
       })
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };

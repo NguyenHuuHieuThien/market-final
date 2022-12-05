@@ -4,17 +4,17 @@ import DetailProduct from "../layout/DetailProduct";
 import Carts from "../layout/Carts";
 import SignIn from "../layout/Login/SignIn";
 import SignUp from "../layout/Login/SignUp";
-import ProductList from "../layout/Admin/productList";
+import productManager from "../layout/Admin/productManager";
 import Users from "../layout/Admin/UserList";
 import Trash from "../layout/Admin/trash";
 import ProfilePage from "../layout/Profile";
-import UpdatePage from "../layout/UpdatePage";
 import AddproductPage from "../layout/Addproduct";
 import Adduser from "../layout/Adduser";
 import Posted from "../layout/Posted";
 import SellerManager from '../layout/AcceptOrder'
 import SellBill from "../layout/SellBill";
 import BillDetail from "../layout/BillDetail";
+import ProductList from "../layout/Admin/productList";
 
 //Public Routes
 export const publicRoutes = [
@@ -33,6 +33,7 @@ export const publicRoutes = [
   { path: "/carts", component: Carts },
   { path: "/sign-in", component: SignIn },
   { path: "/sign-up", component: SignUp },
+  { path: "/admin/product/manager", component: productManager },
   { path: "/admin/products", component: ProductList },
   { path: "/admin/users", component: Users },
   { path: "/admin/trash", component: Trash },

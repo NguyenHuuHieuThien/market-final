@@ -28,9 +28,9 @@ import {
   faTelevision,
   faBarsProgress,
   faListCheck,
-  faCheck
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link,useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Collapse } from "react-bootstrap";
 
 import ModalReact from "../../component/Modal";
@@ -44,38 +44,60 @@ const profileMenu = [
   { name: "Sản phẩm đã đăng", link: "/sell/list", icon: faListCheck },
   { name: "Phê duyệt đơn hàng", link: "/sell/manager", icon: faCheck },
   { name: "Đăng bài", link: "/product/add", icon: faEdit },
-  { name: "Đăng xuất", link: "/", icon: faRightFromBracket, logout: function(){ setTimeout(() => {
-    window.location.href = "/"
-  }, 1000);} },
+  {
+    name: "Đăng xuất",
+    link: "/",
+    icon: faRightFromBracket,
+    logout: function () {
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+    },
+  },
 ];
 export default function BgUser({ children }) {
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  let location  = useLocation()
-  let path = location.pathname.includes('profile')
-  let user = JSON.parse(localStorage.getItem('token'))
-  const logout= ()=>{
-    localStorage.clear()
+  let location = useLocation();
+  let path = location.pathname.includes("profile");
+  let user = JSON.parse(localStorage.getItem("token"));
+  const logout = () => {
+    localStorage.clear();
     setTimeout(() => {
-      window.location.href = "/"
+      window.location.href = "/";
     }, 1000);
-  }
+  };
   return (
     <div className="bg-main">
       <ModalReact
         children={
           <div>
             <div class="form-floating mb-3">
-              <input class="form-control" type="password" required id="currentPass" />
+              <input
+                class="form-control"
+                type="password"
+                required
+                id="currentPass"
+              />
               <label for="currentPass">Mật khẩu hiện tại</label>
             </div>
             <div class="form-floating mb-3">
-              <input class="form-control" required type="password" id="newPass" />
+              <input
+                class="form-control"
+                required
+                type="password"
+                id="newPass"
+              />
               <label for="newPass">Mật khẩu mới</label>
             </div>
             <div class="form-floating mb-3">
-              <input class="form-control" required type="password" id="checkNewPass" />
+              <input
+                class="form-control"
+                required
+                type="password"
+                id="checkNewPass"
+              />
               <label for="checkNewPass">Nhập lại mật khẩu</label>
             </div>
           </div>
@@ -86,7 +108,7 @@ export default function BgUser({ children }) {
       ></ModalReact>
       <div className="row">
         <div
-          className="col-3 mt-3 bg-white sticky-top rounded-2 mb-3 ms-5 shadow-sm"
+          className="col-2 col-sm-2 col-md-2 col-lg-3 col-xl-3 mt-3 bg-white sticky-top rounded-2 mb-3 ms-4 shadow-sm"
           style={{ height: "100vh" }}
         >
           <div className="w-100 ">
@@ -97,14 +119,22 @@ export default function BgUser({ children }) {
                     to={item.link}
                     key={index}
                     onClick={item?.logout}
-                    className={`text-decoration-none text-black ${(item.name === 'Sản phẩm đã đăng' ||item.name === 'Phê duyệt đơn hàng'||item.name === 'Đăng bài' )&&user.roles[0]==="ROLE_USER"&&"d-none"}`}
+                    className={`text-decoration-none text-black ${
+                      (item.name === "Sản phẩm đã đăng" ||
+                        item.name === "Phê duyệt đơn hàng" ||
+                        item.name === "Đăng bài") &&
+                      user.roles[0] === "ROLE_USER" &&
+                      "d-none"
+                    }`}
                   >
-                    <div className="d-flex justify-content-between p-3 hover mb-3">
+                    <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex justify-content-between py-3 hover mb-3">
                       <span>
-                        <FontAwesomeIcon icon={item.icon} className="me-2" />{" "}
-                        {item.name}
+                        <span>
+                          <FontAwesomeIcon icon={item.icon} className="me-2" />{" "}
+                        </span>
+                        <span className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block">{item.name}</span>
                       </span>
-                      <FontAwesomeIcon icon={faChevronRight} />
+                      <FontAwesomeIcon className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block" icon={faChevronRight} />
                     </div>
                   </Link>
                 );
@@ -114,14 +144,18 @@ export default function BgUser({ children }) {
         </div>
         <div className="col-8 mt-3 p-0">
           <MDBContainer className="ms-2">
-            <div className="d-flex justify-content-between bg-white p-3 rounded-3 mb-3 shadow-sm  sticky-top">
+            <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex justify-content-between bg-white p-3 rounded-3 mb-3 shadow-sm  sticky-top">
               <div>
                 <Link to="/product/add">
                   <button className="btn btn-primary me-2">Đăng tin</button>
                 </Link>
-                {path&& <Link to={`/user/update/${user.id}`}>
-                  <button className="btn btn-success me-2">Sửa profile</button>
-                </Link>}
+                {path && (
+                  <Link to={`/user/update/${user.id}`}>
+                    <button className="btn btn-success me-2">
+                      Sửa profile
+                    </button>
+                  </Link>
+                )}
                 <button
                   className="btn btn-info me-2"
                   onClick={() => setShow(true)}
@@ -129,9 +163,11 @@ export default function BgUser({ children }) {
                   Đổi mật khẩu
                 </button>
               </div>
-              <button onClick={logout} className="btn btn-danger rounded-5">Đăng xuất</button>
+              <button onClick={logout} className="btn btn-danger rounded-5">
+                Đăng xuất
+              </button>
             </div>
-            <div className="p-3 mb-3 shadow-sm">{children}</div>
+            <div className="mb-3 shadow-sm">{children}</div>
           </MDBContainer>
         </div>
       </div>

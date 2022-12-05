@@ -122,7 +122,12 @@ export default function SellBill() {
                       <td>
                         <Link to={`/sell/product/${item.idProduct}`}>
                           <button type="button" className="btn btn-info me-2">
-                            Xem đơn hàng
+                            Xem
+                          </button>
+                        </Link>
+                        <Link to={`/product/update/${item.idProduct}`}>
+                          <button type="button" className="btn btn-success me-2">
+                           Sửa
                           </button>
                         </Link>
                       </td>
