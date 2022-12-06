@@ -21,15 +21,19 @@ import { useCallback } from "react";
 export default function ProductPage() {
   const [productList, setProductList] = useState([]);
   const [productCategory, setProductCategory] = useState([])
+  const [datafull, setDataFull] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState([]);
+  const [searchdata, setSearchdata] = useState('');
+  const [pagenumber, setPageNumber] = useState(0);
+  const [number, setNumber] = useState(0);
   useEffect(() => {
     setIsLoading(true);
     axios
-        .get("http://localhost:8080/product/selectAll")
+        .get(`http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=10&status=active`)
         .then((res) => {
-          setProductList(res.data.filter(item=> item.status === 'active'));
-          setProductCategory(res.data.filter(item=> item.status === 'active'))
+          setProductList(res.data);
+          setProductCategory(res.data)
           setIsLoading(false);
         })
         .catch((err) => console.log(err));
@@ -49,6 +53,14 @@ export default function ProductPage() {
       })
       .catch((err) => console.log(err));
   };
+  const changePage=(type)=>{
+    if(type==='next'){
+      setPageNumber(pagenumber+1)
+
+    }else{
+      setPageNumber(pagenumber-1)
+    }
+  }
   const getCategories = (category) => {
     // if (productList) {
     //   setProductList(
@@ -75,7 +87,12 @@ export default function ProductPage() {
 
 
   const searchProduct = () => {
-    axios.post("/product/selectByParamProductPaging");
+    axiosx.get(`/product/selectByParamProductPaging?param=${String(searchdata)}&pageNo=0&pageSize=10&status=active`)
+    .then((res) => {
+      setProductCategory(res.data);
+      // setNumber(number+1)
+    })
+    .catch((err) => console.log(err));
   };
   return (
     <div className="bg-main">
@@ -93,11 +110,13 @@ export default function ProductPage() {
           <Col xs={6}>
             <div className="input-group  mb-3">
               <input
+              onChange={e=>setSearchdata(e.target.value)}
                 type="text"
                 className="form-control"
                 placeholder="search..."
               />
               <button
+              onClick={searchProduct}
                 className="btn btn-warning"
                 type="button"
                 id="button-addon2"
@@ -183,6 +202,15 @@ export default function ProductPage() {
             ))
           )}
         </Row>
+        <nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item"><a className="page-link" onClick={()=>changePage('back')}>Previous</a></li>
+    <li class="page-item"><a className="page-link" href="#">1</a></li>
+    <li class="page-item"><a className="page-link" href="#">2</a></li>
+    <li class="page-item"><a className="page-link" href="#">3</a></li>
+    <li class="page-item"><a className="page-link" onClick={()=>changePage('next')}>Next</a></li>
+  </ul>
+</nav>
         {/* {data.totalPage > 1 && <myPagination total={data.totalPage} current={page} onChange={handleChangePage} />} */}
       </div>
       <Footer />

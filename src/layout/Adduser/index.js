@@ -57,9 +57,9 @@ function Adduser() {
       delete dataUpdate.status;
       axios
         .put(`/user/update/${id}`, dataUpdate)
-        .then(() => {
-          localStorage.setItem('userInfo', JSON.stringify(dataUpdate))
+        .then((res) => {
           enqueueSnackbar('Cập nhật thành công', {variant:'success'})
+          localStorage.setItem('userInfo', JSON.stringify(res.data))
           navigate("/user/profile");
         })
         .catch((err) => {

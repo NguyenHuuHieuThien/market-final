@@ -18,32 +18,32 @@ import { axiosx as axios } from "../../Helper";
 import BgUser from "../../component/BgUser";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import FontAwesomeIcon from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import Spinner from "../../component/Spinner";
 export default function ProfilePage() {
   // const {enqueueSnackbar} = useSnackbar();
   // const [open, setOpen] = useState(false);
   let user = JSON.parse(localStorage.getItem("token"));
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState();
   const [dataUpdate, setDataUpdate] = useState("");
   const [userinfo, setUserInfo] = useState(user);
-  if (user) {
-    setUserInfo(user);
-    console.log(userinfo);
-  }
+
   const handle = (e) => {
     setDataUpdate(e.target.value);
     console.log(dataUpdate);
   };
   useEffect(() => {
+    console.log(userInfo)
     setIsLoading(true);
     axios
       .get(`/bill/select/${user.id}?status=active`)
       .then((res) => {
+        console.log(res.data)
         setData(res.data);
         setIsLoading(false);
       })
@@ -100,7 +100,7 @@ export default function ProfilePage() {
                 <MDBCardBody className="text-center shadow-sm">
                   <div className="d-flex justify-content-center">
                     <MDBCardImage
-                      src={userinfo?.fileList[0].fileDownloadUri}
+                      src={userInfo?.urlImageSet[0]?? user?.fileList[0].fileDownloadUri}
                       alt="avatar"
                       className="rounded-pill"
                       style={{ width: "150px", height: "150px" }}
@@ -109,9 +109,9 @@ export default function ProfilePage() {
                   </div>
                   <div className="mt-3 mb-4">
                     <span className="text-muted mb-1 d-block ">
-                      {userinfo?.username}
+                      {userInfo?.username ?? user?.username}
                     </span>
-                    <span className="text-muted mb-4">{userinfo?.name}</span>
+                    <span className="text-muted mb-4">{userInfo?.fullName ?? user?.name}</span>
                   </div>
                   <div className="d-flex justify-content-center mb-3">
                     <MDBBtn>Follow</MDBBtn>
@@ -131,7 +131,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.name}
+                        {userInfo?.fullName ?? user?.name}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.email}
+                        {userInfo?.email ?? user?.email}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.phoneNumber}
+                        {userInfo?.phoneNumber ?? user?.phoneNumber}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -164,7 +164,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.birthday}
+                        {userInfo?.birthday ?? user?.birthday}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -175,7 +175,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.sex === "male" ? "Nam" : "Nữ"}
+                        {userInfo?.sex === "male"?? user?.sex === "male" ? "Nam" : "Nữ"}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -186,7 +186,7 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userinfo?.address}
+                        {userInfo?.address ?? user?.address}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                     ) : data && data.length > 0 ? (
                       data.map((item, index) => (
                         <tr key={index}>
-                          <td></td>
+                          <td><img style={{width: '50px'}} src={item.product.urlFile[0]}/></td>
                           <td>{item.product.productName}</td>
                           <td>{item.product.price}</td>
                           <td>{item.amount}</td>

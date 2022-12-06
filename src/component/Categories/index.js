@@ -22,7 +22,8 @@ function Category({ selectCategory, allCategory, getCategories }) {
          key={index}
           className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
         >
-          <div className="category-color pe-2">
+          
+          <div onClick={()=>selectCategory(item.idCategory)} className="category-color pe-2">
             <span>{item.categoryName}</span>
           </div>
         </div>
