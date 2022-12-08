@@ -3,17 +3,12 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Switch from "@mui/material/Switch";
-
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -21,6 +16,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import FormGroup from "@mui/material/FormGroup";
 import { useSnackbar } from "notistack";
+import { faEye , faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 
 const theme = createTheme();
 
@@ -28,6 +24,8 @@ export default function SignUp() {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [data, setData] = useState({});
+  const [showpass, setShowPass] = useState(false)
+  const [iconeye, setIconEye] = useState(faEye)
   const label = { inputProps: { "aria-label": "Switch demo" } };
   console.log(data);
   const handleData = (e) => {
@@ -40,6 +38,15 @@ export default function SignUp() {
     console.log(data);
     setData(newData);
   };
+//   const showPass = ()=>{
+   
+//     if(showpass){
+//       setIconEye(faEyeSlash)
+//     }else{
+//         setIconEye(faEye)
+//     }
+//     setShowPass(!showpass)
+// }
   const submit = (event) => {
     event.preventDefault();
     let formData = new FormData();
@@ -155,16 +162,19 @@ export default function SignUp() {
                     />
                   </Grid>
                   <Grid item xs={12}>
+                    <div className = 'd-flex justify-content-center align-items-center'>
                     <TextField
                       required
-                      fullWidth
                       name="password"
                       onChange={(e) => handleData(e)}
                       label="Mật khẩu"
-                      type="password"
+                      type={showpass ? "text" : "password"}
                       id="password"
+                      className="w-100"
                       autoComplete="Mật khẩu"
                     />
+                    <div onClick={()=> setShowPass(!showpass)} className="btn border border-main py-3 rounded-1"><FontAwesomeIcon className="px-2" icon={showpass? faEyeSlash: faEye}/></div>
+                    </div>
                   </Grid>
                   <Grid item xs={12}>
                     <div class="form-check form-check-inline">
@@ -195,10 +205,12 @@ export default function SignUp() {
                     <TextField
                       required
                       fullWidth
+                      label="Ngày sinh"
                       name="birthday"
                       onChange={(e) => handleData(e)}
                       type="date"
                       id="birthday"
+                      placeholder=""
                     />
                   </Grid>
 

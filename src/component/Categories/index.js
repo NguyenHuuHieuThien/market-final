@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { axiosx as axios } from "../../Helper";
-function Category({ selectCategory, allCategory, getCategories }) {
+function Category({ selectCategory, allCategory}) {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     if (axios) {
@@ -10,9 +10,6 @@ function Category({ selectCategory, allCategory, getCategories }) {
         .catch((err) => console.log(err));
     }
   }, []);
-  const sendCategories = (() => {
-    getCategories(categories);
-  })();
   return (
     <div className="row">
     {categories &&

@@ -20,6 +20,7 @@ import {
 import { Link } from "react-router-dom";
 import ModalReact from "../../component/Modal";
 import { axiosx as axios } from "../../Helper";
+import {useSnackbar} from 'notistack'
 
 const profileMenu = [
   { name: "Trang chủ người dùng", link: "/", icon: faHome },
@@ -31,8 +32,13 @@ const profileMenu = [
 ];
 
 export default function UserList() {
+  let {enqueueSnackbar} = useSnackbar();
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const handleShow = (id) => {
+    setShow(true);
+    setUserId(id);
+  };
   const [userid, setUserId] = useState();
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkList, setCheckList] = useState([]);
@@ -40,6 +46,7 @@ export default function UserList() {
   const [isLoading, setIsLoading] = useState(false);
   console.log(checkList);
   const [data, setData] = useState([]);
+  const [ids, setIds] = useState([data.length>0?data.map(item=> item.idProduct):[]])
   let user = JSON.parse(localStorage.getItem("token"));
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);
@@ -56,36 +63,33 @@ export default function UserList() {
       setCheckList([...checkList, id]);
     }
   };
-  const handleShow = (id) => {
-    setShow(true);
-    setUserId(id);
-  };
+
 
   console.log(data);
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     if (axios) {
       axios
         .get("/user/user-full")
         .then((res) => {
           setData(res.data.filter((item) => item.status === "active"));
-          setIsLoading(false);
+          // setIsLoading(false);
         })
         .catch((err) => {
           console.log(err);
         });
     }
-  }, []);
+  }, [ids]);
   const deleteUser = () => {
     axios
       .delete(`/user/delete/${userid}`)
-      .then((res) => {
-        console.log(res);
-        setData(data.filter((user) => user.idUser !== userid));
+      .then(() => {
+        setIds(ids.filter(item=> item.idUser !== userid))
+        enqueueSnackbar('Đã xóa người dùng', {variant: 'success'})
         setShow(false);
       })
       .catch((err) => {
-        console.log(err);
+        enqueueSnackbar('Không thể xóa người dùng', {variant: 'danger'})
       });
   };
   const deleteAll = () => {
@@ -122,10 +126,10 @@ export default function UserList() {
           <ModalReact
             show={show}
             handleClose={handleClose}
-            deleteUser={deleteUser}
+            handleFunction={deleteUser}
             handleShow={handleShow}
           >
-            Do you want delete user?
+            Bạn chắc chắn muốn xóa người dùng này?
           </ModalReact>
 
           <div className="row m-0">

@@ -10,33 +10,45 @@ import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { MDBInput } from "mdb-react-ui-kit";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
 import Category from "../../component/Categories";
+import { useSnackbar } from "notistack";
+import ModalReact from "../../component/Modal";
 import { useCallback } from "react";
 
 export default function ProductPage() {
+  let navigate = useNavigate();
+  let user = JSON.parse(localStorage.getItem("token"));
   const [productList, setProductList] = useState([]);
-  const [productCategory, setProductCategory] = useState([])
+  const [productCategory, setProductCategory] = useState([]);
   const [datafull, setDataFull] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState([]);
-  const [searchdata, setSearchdata] = useState('');
+  const [searchdata, setSearchdata] = useState("");
   const [pagenumber, setPageNumber] = useState(0);
   const [number, setNumber] = useState(0);
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => {
+    setShow(true);
+  };
+  let { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     setIsLoading(true);
     axios
-        .get(`http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=10&status=active`)
-        .then((res) => {
-          setProductList(res.data);
-          setProductCategory(res.data)
-          setIsLoading(false);
-        })
-        .catch((err) => console.log(err));
+      .get(
+        `http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=10&status=active`
+      )
+      .then((res) => {
+        setProductList(res.data);
+        setProductCategory(res.data);
+        setIsLoading(false);
+      })
+      .catch((err) => console.log(err));
   }, []);
   console.log(productCategory);
   const selectCategory = (id) => {
@@ -45,7 +57,8 @@ export default function ProductPage() {
       .get(`http://localhost:8080/category/search/${id}`)
       .then((res) => {
         console.log(res.data);
-        setProductCategory(productList.filter(
+        setProductCategory(
+          productList.filter(
             (product) => product.idCategory === res.data.idCategory
           )
         );
@@ -53,46 +66,47 @@ export default function ProductPage() {
       })
       .catch((err) => console.log(err));
   };
-  const changePage=(type)=>{
-    if(type==='next'){
-      setPageNumber(pagenumber+1)
-
-    }else{
-      setPageNumber(pagenumber-1)
+  const changePage = (type) => {
+    if (type === "next") {
+      setPageNumber(pagenumber + 1);
+    } else {
+      setPageNumber(pagenumber - 1);
     }
-  }
-  const getCategories = (category) => {
-    // if (productList) {
-    //   setProductList(
-    //     productList.map((item) => {
-    //       item.categoryName = category.filter(
-    //         (e) => e.idCategory === item.idCategory
-    //       ).categoryName;
-    //       return item;
-    //     })
-    //   );
-    // }
   };
-
-  const allCategory =()=>{
+  const addToCart = (id, amount) => {
+    axiosx
+      .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {
+        amount: amount,
+      })
+      .then(() => {
+        enqueueSnackbar("Đã thêm vào giỏ", { variant: "success" });
+        navigate("/carts");
+      })
+      .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
+  };
+  const allCategory = () => {
     setIsLoading(true);
     axiosx
-        .get("/product/selectAll")
-        .then((res) => {
-          setProductCategory(res.data.filter(item=> item.status === 'active'));
-          setIsLoading(false);
-        })
-        .catch((err) => console.log(err));
-  }
-
+      .get("/product/selectAll")
+      .then((res) => {
+        setProductCategory(res.data.filter((item) => item.status === "active"));
+        setIsLoading(false);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const searchProduct = () => {
-    axiosx.get(`/product/selectByParamProductPaging?param=${String(searchdata)}&pageNo=0&pageSize=10&status=active`)
-    .then((res) => {
-      setProductCategory(res.data);
-      // setNumber(number+1)
-    })
-    .catch((err) => console.log(err));
+    axiosx
+      .get(
+        `/product/selectByParamProductPaging?param=${String(
+          searchdata
+        )}&pageNo=0&pageSize=10&status=active`
+      )
+      .then((res) => {
+        setProductCategory(res.data);
+        // setNumber(number+1)
+      })
+      .catch((err) => console.log(err));
   };
   return (
     <div className="bg-main">
@@ -101,22 +115,18 @@ export default function ProductPage() {
         <h1 className="text-uppercase me-5 mb-5 sticky-top border-underline w-100 py-3 bg-white">
           Sản phẩm
         </h1>
-        <Category
-        allCategory={allCategory}
-          getCategories={getCategories}
-          selectCategory={selectCategory}
-        />
+        <Category allCategory={allCategory} selectCategory={selectCategory} />
         <Row>
           <Col xs={6}>
             <div className="input-group  mb-3">
               <input
-              onChange={e=>setSearchdata(e.target.value)}
+                onChange={(e) => setSearchdata(e.target.value)}
                 type="text"
                 className="form-control"
                 placeholder="search..."
               />
               <button
-              onClick={searchProduct}
+                onClick={searchProduct}
                 className="btn btn-warning"
                 type="button"
                 id="button-addon2"
@@ -162,7 +172,10 @@ export default function ProductPage() {
                             {product.categoryName}
                           </Badge>
                           <Badge bg="warning">Giá: </Badge>
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(product.price)}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -174,13 +187,20 @@ export default function ProductPage() {
                       </CardContent>
                       <div className="d-flex justify-content-center">
                         <CardActions>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="success"
-                          >
-                            Thêm vào giỏ
-                          </Button>
+                          {product.amount == 0 ? (
+                            <span className="btn btn-sm rounded-1 btn-danger disabled">
+                              Hết hàng
+                            </span>
+                          ) : (
+                            <Button 
+                              onClick={() => addToCart(product.idProduct, product.amount)}
+                              size="small"
+                              variant="contained"
+                              color="success"
+                            >
+                              Thêm vào giỏ
+                            </Button>
+                          )}
                           <Link
                             to={`/product/${product.idProduct}`}
                             className="ms-2"
@@ -203,14 +223,34 @@ export default function ProductPage() {
           )}
         </Row>
         <nav aria-label="Page navigation example">
-  <ul class="pagination">
-    <li class="page-item"><a className="page-link" onClick={()=>changePage('back')}>Previous</a></li>
-    <li class="page-item"><a className="page-link" href="#">1</a></li>
-    <li class="page-item"><a className="page-link" href="#">2</a></li>
-    <li class="page-item"><a className="page-link" href="#">3</a></li>
-    <li class="page-item"><a className="page-link" onClick={()=>changePage('next')}>Next</a></li>
-  </ul>
-</nav>
+          <ul class="pagination">
+            <li class="page-item">
+              <a className="page-link" onClick={() => changePage("back")}>
+                Previous
+              </a>
+            </li>
+            <li class="page-item">
+              <a className="page-link" href="#">
+                1
+              </a>
+            </li>
+            <li class="page-item">
+              <a className="page-link" href="#">
+                2
+              </a>
+            </li>
+            <li class="page-item">
+              <a className="page-link" href="#">
+                3
+              </a>
+            </li>
+            <li class="page-item">
+              <a className="page-link" onClick={() => changePage("next")}>
+                Next
+              </a>
+            </li>
+          </ul>
+        </nav>
         {/* {data.totalPage > 1 && <myPagination total={data.totalPage} current={page} onChange={handleChangePage} />} */}
       </div>
       <Footer />

@@ -15,6 +15,7 @@ import SellerManager from '../layout/AcceptOrder'
 import SellBill from "../layout/SellBill";
 import BillDetail from "../layout/BillDetail";
 import ProductList from "../layout/Admin/productList";
+import AwaitAccept from "../layout/awaitAccept";
 
 //Public Routes
 export const publicRoutes = [
@@ -27,6 +28,7 @@ export const publicRoutes = [
   { path: "/user/update/:id", component: Adduser },
   { path: "/user/add", component: Adduser },
   { path: "/user/posted", component: Posted },
+  { path: "/user/await", component: AwaitAccept },
   { path: "/sell/manager", component: SellerManager },
   { path: "/sell/list", component: SellBill },
   { path: "/sell/product", component: BillDetail },

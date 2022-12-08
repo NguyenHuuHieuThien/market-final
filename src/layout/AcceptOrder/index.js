@@ -18,14 +18,12 @@ export default function SellerManager() {
   const [checkList, setCheckList] = useState([]);
   const [image, setImage] = useState();
   useEffect(() => {
-    if (axios) {
       axios
         .get(`/bill/selectByUser/${user.id}?status=pending`)
         .then((res) =>
-          setOrderList(res.data.filter((item) => item.status === "pending"))
+          setOrderList(res.data)
         )
         .catch((err) => console.log(err));
-    }
   }, []);
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);

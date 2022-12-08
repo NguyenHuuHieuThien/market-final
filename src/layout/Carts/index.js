@@ -1,11 +1,10 @@
 import Table from "react-bootstrap/Table";
 import { useEffect, useState } from "react";
 import { axiosx as axios } from "../../Helper";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
-import ModalReact from "../../component/Modal";
 import { useSnackbar } from "notistack";
 
 export default function Carts() {
@@ -54,7 +53,10 @@ export default function Carts() {
     console.log(_data);
     axios
       .post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
-      .then(() => enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" }))
+      .then(() => {
+        enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" })
+        // navigate('/')
+      })
       .catch(() =>
         enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
       );
@@ -142,7 +144,7 @@ export default function Carts() {
                 onClick={() => order(data[0].product.idProduct)}
                 className="btn btn-outline-success px-5 rounded-5 mr-0"
               >
-                Thanh Toán
+                Đặt hàng
               </button>
             </div>
           </div>

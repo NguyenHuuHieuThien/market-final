@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import province from "./../../Province/data.json";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSnackbar } from "notistack";
+import ModalReact from "../../component/Modal";
 import {
   faTruck,
   faCirclePlus,
@@ -17,11 +18,6 @@ import {
   faCartPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect } from "react";
-// const images = [
-//   "https://cdn.tgdd.vn/Files/2016/08/31/881752/quoc-khanh-2-9-760-3671.jpg",
-//   "https://cdn.tgdd.vn/Files/2017/08/24/1015732/online-friday-760-367.png",
-//   "https://cdn.tgdd.vn/Files/2018/12/28/1141041/sam-tet-ruoc-loc-mung-nam-moi-2019-vo-van-uu-dai-hap-dan-tai-dien-may-xanh-760x367.png"
-// ];
 export default function DetailProduct() {
   const inputRef = useRef(null);
   const { enqueueSnackbar } = useSnackbar();
@@ -33,8 +29,13 @@ export default function DetailProduct() {
   const [data, setData] = useState({});
   const [image, setImage] = useState([]);
   const [totalComment, setTotalComment] = useState(0);
-  const [isReply, setIsReply] = useState(false)
+  const [isReply, setIsReply] = useState(false);
   let { id } = useParams();
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => {
+    setShow(true);
+  };
   let user = JSON.parse(localStorage.getItem("token"));
   console.log(image);
   const submit = (e) => {
@@ -63,7 +64,7 @@ export default function DetailProduct() {
       .then(() => {
         enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
         setTotalComment(totalComment + 1);
-        setImage(new File([""], ""))
+        setImage(new File([""], ""));
       })
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
@@ -78,7 +79,10 @@ export default function DetailProduct() {
       .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {
         amount: amount,
       })
-      .then(() => enqueueSnackbar("Đã thêm vào giỏ", { variant: "success" }))
+      .then(() => {
+        enqueueSnackbar("Đã thêm vào giỏ", { variant: "success" });
+        handleClose();
+      })
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
   useEffect(() => {
@@ -86,7 +90,7 @@ export default function DetailProduct() {
       axios
         .get(`/product/selectAll`)
         .then((res) => {
-          console.log(res.data);
+          console.log(res.data.filter((item) => item.idProduct === Number(id))[0]);
           setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
           setProducts(res.data);
         })
@@ -102,9 +106,38 @@ export default function DetailProduct() {
         .catch((err) => console.log(err));
     }
   }, [totalComment]);
+  const order = () => {
+    console.log(data);
+    let _data = { ...data };
+    delete _data.product;
+    _data.totalPrice = amount * data.price;
+    let date = new Date();
+    _data.createDate = `${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}`;
+    _data.amount = amount
+    console.log(_data);
+    axios
+      .post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
+      .then(() => {
+        enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" })
+        // navigate('/')
+      })
+      .catch(() =>
+        enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
+      );
+  };
   return (
     <div>
       <div className="bg-main">
+        <ModalReact
+          show={show}
+          handleClose={handleClose}
+          handleFunction={addToCart}
+          handleShow={handleShow}
+        >
+          Bạn muốn thêm sản phẩm này vào giỏ hàng?
+        </ModalReact>
         <Navbars />
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
           <Row>
@@ -119,14 +152,23 @@ export default function DetailProduct() {
                   <FontAwesomeIcon icon={faTruck} className="me-2" />
                   Vận chuyển tới
                 </div>
-                <select class="form-select" aria-label="Default select example">
+                <div class="form-floating mb-3 w-100">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="address"
+                    placeholder="name@example.com"
+                  />
+                  <label for="address">Nhập nơi nhận...</label>
+                </div>
+                {/* <select class="form-select" aria-label="Default select example">
                   <option selected>-- Nơi nhận --</option>
                   {provinces.map((item, index) => (
                     <option key={index} value={index}>
                       {item.name}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
               <div className="mb-4 d-flex">
                 <div className="me-5">Số lượng</div>
@@ -152,11 +194,11 @@ export default function DetailProduct() {
                 </div>
               </div>
               <div className="mt-4">
-                <button className="btn bg-spotlight me-3" onClick={addToCart}>
+                <button className="btn bg-spotlight me-3" onClick={handleShow}>
                   <FontAwesomeIcon icon={faCartPlus} className="me-2" />
                   Thêm vào giỏ hàng
                 </button>
-                <button className="btn btn-buy text-white">Mua ngay</button>
+                <button onClick={order} className="btn btn-buy text-white">Mua ngay</button>
               </div>
             </Col>
           </Row>
@@ -167,7 +209,7 @@ export default function DetailProduct() {
               <div className="me-3">
                 <img
                   className="rounded-pill"
-                  src="https://yt3.ggpht.com/XkcR_0_hNSF1QSORprbltUR23RyOSfnCUBYo0BEUwvAZrV2UVuY3ltSa5BukufP4oQEQ5cKN=s900-c-k-c0x00ffffff-no-rj"
+                  src={user.fileList[0].fileDownloadUri}
                   width="80px"
                 />
               </div>
@@ -275,7 +317,7 @@ export default function DetailProduct() {
               <div className="me-3">
                 <img
                   className="avt"
-                  src="https://danviet.mediacdn.vn/296231569849192448/2021/6/28/huakhai4-1624835323234-1624835323406100909784.jpg"
+                  src={user.fileList[0].fileDownloadUri}
                 />
               </div>
               <form
@@ -292,7 +334,7 @@ export default function DetailProduct() {
                     aria-describedby="button-addon2"
                   />
                   <label className="btn btn-outline-success" htmlFor="files">
-                      <span>Thêm hình</span>
+                    <span>Thêm hình</span>
                   </label>
                 </div>
                 <input
@@ -347,49 +389,56 @@ export default function DetailProduct() {
                         >
                           Thích
                         </a>
-                        <a onClick={()=> setIsReply(!isReply)}
+                        <a
+                          onClick={() => setIsReply(!isReply)}
                           role="button"
                           className="form-text text-decoration-none"
                         >
                           Phản hồi
                         </a>
                       </div>
-                      {isReply &&
-                      <form
-                      className="w-100"
-                      encType="multipart/form-data"
-                      onSubmit={(e) => submit(e)}
-                    >
-                      <div class="input-group mb-3">
-                        <input
-                          type="text"
-                          onChange={(e) => setComment(e.target.value)}
-                          class="form-control"
-                          placeholder="Nhập đánh giá..."
-                          aria-describedby="button-addon2"
-                        />
-                        <label className="btn btn-outline-success" htmlFor="files">
-                            <span>Thêm hình</span>
-                        </label>
-                      </div>
-                      <input
-                        ref={inputRef}
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        id="files"
-                        multiple
-                        type="file"
-                        onChange={(e) => {
-                          setImage(e.target.files);
-                        }}
-                      />
-                      <div>
-                        <button type="submit" className="btn btn-success rounded-1">
-                          Bình luận
-                        </button>
-                      </div>
-                    </form>
-                      }
+                      {isReply && (
+                        <form
+                          className="w-100"
+                          encType="multipart/form-data"
+                          onSubmit={(e) => submit(e)}
+                        >
+                          <div class="input-group mb-3">
+                            <input
+                              type="text"
+                              onChange={(e) => setComment(e.target.value)}
+                              class="form-control"
+                              placeholder="Nhập đánh giá..."
+                              aria-describedby="button-addon2"
+                            />
+                            <label
+                              className="btn btn-outline-success"
+                              htmlFor="files"
+                            >
+                              <span>Thêm hình</span>
+                            </label>
+                          </div>
+                          <input
+                            ref={inputRef}
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            id="files"
+                            multiple
+                            type="file"
+                            onChange={(e) => {
+                              setImage(e.target.files);
+                            }}
+                          />
+                          <div>
+                            <button
+                              type="submit"
+                              className="btn btn-success rounded-1"
+                            >
+                              Bình luận
+                            </button>
+                          </div>
+                        </form>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -410,17 +459,35 @@ export default function DetailProduct() {
                         <div className="bg-white border-main">
                           <div className="">
                             <img
-                              src="https://cf.shopee.vn/file/8614a7dc701d14d3ca05527edee54a17"
-                              width="100%"
+                              src={item?.urlFile[0]}
+                              style={{ width: "100%", height: "155px" }}
                             />
                           </div>
                           <div className="px-3 text-center pb-2 mt-2 text-start">
-                            <div style={{ fontSize: "14px" }}>
+                            <div style={{ fontSize: "12px" }}>
                               {item.productName}
                             </div>
                             {/* <div className="d-flex justify-content-between"> */}
-                              <div style={{ fontSize: "12px" }}>Giá: <span  className="text-main text-xs">{item.price.toLocaleString()} VND</span></div>
-                              <div className="form-text" style={{ fontSize: "12px" }}><span className={item.amount ==0? 'text-danger': ''}>{item.amount>0? `Còn lại: ${item.amount}`: 'Hết Hàng'}</span></div>
+                            <div style={{ fontSize: "12px" }}>
+                              Giá:{" "}
+                              <span className="text-main text-xs">
+                                {item.price.toLocaleString()} VND
+                              </span>
+                            </div>
+                            <div
+                              className="form-text"
+                              style={{ fontSize: "12px" }}
+                            >
+                              <span
+                                className={
+                                  item.amount == 0 ? "text-danger" : ""
+                                }
+                              >
+                                {item.amount > 0
+                                  ? `Còn lại: ${item.amount}`
+                                  : "Hết Hàng"}
+                              </span>
+                            </div>
                             {/* </div> */}
                           </div>
                         </div>

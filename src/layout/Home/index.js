@@ -11,6 +11,7 @@ import axios from "axios";
 export default function HomePage() {
   const [category, setCategory] = useState([]);
   const [product, setProduct] = useState();
+  const [productCategory, setProductCategory] = useState([])
 
   useEffect(() => {
        axios
@@ -25,10 +26,25 @@ export default function HomePage() {
       .then((res) => {
         console.log(res.data);
         setProduct(res.data.filter(item=> item.status === 'active'));
+        setProductCategory(res.data.filter(item=> item.status === 'active'))
       })
       .catch((err) => console.log(err));
 
   }, []);
+  const selectCategory = (id) => {
+    // setIsLoading(true);
+    axios
+      .get(`http://localhost:8080/category/search/${id}`)
+      .then((res) => {
+        console.log(res.data);
+        setProductCategory(product.filter(
+            (product) => product.idCategory === res.data.idCategory
+          )
+        );
+        // setIsLoading(false);
+      })
+      .catch((err) => console.log(err));
+  };
   return (
     <div>
       <Navbars position="sticky-top" />
@@ -44,6 +60,7 @@ export default function HomePage() {
                 category.length > 0 &&
                 category.map((item) => (
                   <div
+                  onClick={()=> selectCategory(item.idCategory)}
                    key={item.idCategory}
                     className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
                   >
@@ -63,9 +80,9 @@ export default function HomePage() {
         <div>
           <div>
             <div className="row mt-2 p-1">
-              {product &&
-                product.length > 0 ?
-                product.map((item, index) => (
+              {productCategory &&
+                productCategory.length > 0 ?
+                productCategory.map((item, index) => (
                   <div
                     key={index}
                     className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"

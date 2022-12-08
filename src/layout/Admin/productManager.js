@@ -85,8 +85,10 @@ export default function ProductManager() {
   const [products, setProducts] = useState([]);
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkList, setCheckList] = useState([]);
+  const [ids, setIds] = useState([products.length>0?products.map(item=> item.idProduct):[]])
   const [id, setId] = useState();
   const handleClose = () => setShow(false);
+  console.log(products)
   let user = JSON.parse(localStorage.getItem("token"));
   const handleShow = (id) => {
     setShow(true);
@@ -95,9 +97,12 @@ export default function ProductManager() {
   const accept = (id) => {
     axios
       .put(`/product/deleteListProduct/${id}?status=active`)
-      .then(() => enqueueSnackbar("Đã phê duyệt", { variant: "success" }))
+      .then(() => {
+        setIds(ids.filter(item=> item.idProduct !== id))
+        enqueueSnackbar("Đã phê duyệt", { variant: "success" })
+      })
       .catch(() =>
-        enqueueSnackbar("Không thể phê duyệt sản phẩm", { variant: "success" })
+        enqueueSnackbar("Không thể phê duyệt sản phẩm", { variant: "error" })
       );
   };
   const deleted = (id) => {
@@ -105,6 +110,7 @@ export default function ProductManager() {
       .put(`/product/deleteListProduct/${id}?status=deleted`)
       .then(() => {
         handleClose();
+        setIds(ids.filter(item=> item.idProduct !== id))
         enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" });
       })
       .catch((err) =>
@@ -120,7 +126,7 @@ export default function ProductManager() {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [ids]);
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);
     if (!isCheckAll) {
