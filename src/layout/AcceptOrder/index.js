@@ -8,6 +8,7 @@ import {
   faPlus,
   faTrash,
   faCheckDouble,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { axiosx as axios } from "../../Helper";
 export default function SellerManager() {
@@ -16,15 +17,16 @@ export default function SellerManager() {
   const [orderList, setOrderList] = useState([]);
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkList, setCheckList] = useState([]);
-  const [image, setImage] = useState();
+  const [data, setData] = useState(orderList.length > 0 ? orderList : [])
   useEffect(() => {
       axios
         .get(`/bill/selectByUser/${user.id}?status=pending`)
-        .then((res) =>
+        .then((res) =>{
+        console.log(res.data)
           setOrderList(res.data)
-        )
+  })
         .catch((err) => console.log(err));
-  }, []);
+  }, [data]);
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);
     if (!isCheckAll) {
@@ -44,9 +46,10 @@ export default function SellerManager() {
     // let data = orderList.filter(item=> checkList.inculdes(item.idProduct))
     axios
       .put(`/bill/updateStatus/${id}?status=active`)
-      .then(() =>
+      .then(() =>{
+        setData(data.filter(item=> item.idBill !== id))
         enqueueSnackbar("Đã xác nhận giao hàng", { variant: "success" })
-      )
+      })
       .catch(() =>
         enqueueSnackbar("Xác nhận giao hàng thất bại", { variant: "error" })
       );
@@ -66,8 +69,10 @@ export default function SellerManager() {
   const remove = (id) => {
     axios
       .put(`/bill/updateStatus/${id}?status=deleted`)
-      .then(() =>
+      .then(() =>{
+        setData(data.filter(item=> item.idBill !== id))
         enqueueSnackbar("Đã bỏ đơn đặt của người mua", { variant: "success" })
+      }
       )
       .catch(() =>
         enqueueSnackbar("Bỏ đơn đặt thất bại", { variant: "error" })
@@ -75,10 +80,6 @@ export default function SellerManager() {
   };
   return (
     <div>
-      {user.roles[0]==="ROLE_USER"?
-      <div class="alert alert-danger" role="alert">
-       Bạn không có quyền truy cập
-      </div>:
       <BgUser>
         <h1 className=" bg-white py-5 rounded-3 border-underline">
           Phê duyệt đơn đặt hàng
@@ -127,7 +128,7 @@ export default function SellerManager() {
                       />
                     </td>
                     <td className="col-1">
-                      {/* <img src={item.urlFile[0] } alt="" width="100px" /> */}
+                      <img src={item.product.urlFile[0] } alt="" width="100px" />
                     </td>
                     <td>{item.product.productName}</td>
                     <td>{item.product.price}</td>
@@ -145,7 +146,7 @@ export default function SellerManager() {
                       <button
                         type="button"
                         className="btn btn-danger"
-                        onClick={() => remove(item.idProduct)}
+                        onClick={() => remove(item.idBill)}
                       >
                         Hủy
                       </button>
@@ -160,8 +161,7 @@ export default function SellerManager() {
             </tbody>
           </Table>
         </div>
-      </BgUser>}
-
+      </BgUser>
     </div>
   );
 }

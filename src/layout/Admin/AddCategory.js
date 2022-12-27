@@ -75,7 +75,7 @@ export default function AddCatefory() {
     <BgUser>
       <form onSubmit={(e) => submit(e)}>
         <div className="px-5 py-3 text-start">
-          <h1 className="mb-5 mt-5">Đăng bán Sản phẩm</h1>
+          <h1 className="mb-5 mt-5"></h1>
           <div className="row">
             <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6 pe-5 text-black">
               <div class="mb-3">

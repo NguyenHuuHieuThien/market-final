@@ -63,11 +63,6 @@ export default function SellBill() {
   };
   return (
     <div>
-      {user.roles[0] === "ROLE_USER" ? (
-        <div class="alert alert-danger" role="alert">
-          Bạn không có quyền truy cập
-        </div>
-      ) : (
         <BgUser>
           <h1 className=" bg-white py-5 rounded-3 border-underline">
             Sản phẩm đã đăng
@@ -120,7 +115,7 @@ export default function SellBill() {
                       <td>{item.price}</td>
                       <td>{item.amount}</td>
                       <td>
-                        <Link to={`/sell/product/${item.idProduct}`}>
+                        <Link to={`/product/${item.idProduct}`}>
                           <button type="button" className="btn btn-info me-2">
                             Xem
                           </button>
@@ -145,7 +140,6 @@ export default function SellBill() {
             </Table>
           </div>
         </BgUser>
-      )}
     </div>
   );
 }

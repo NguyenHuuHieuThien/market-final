@@ -19,80 +19,52 @@ import Category from "../../component/Categories";
 import { useSnackbar } from "notistack";
 import ModalReact from "../../component/Modal";
 import { useCallback } from "react";
+import Spinner from "../../component/Spinner";
 
 export default function ProductPage() {
   let navigate = useNavigate();
   let user = JSON.parse(localStorage.getItem("token"));
   const [productList, setProductList] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
-  const [datafull, setDataFull] = useState([]);
+  const [data, setData] = useState(productList.length > 0 ? productList : []);
   const [isLoading, setIsLoading] = useState(true);
-  const [categoryName, setCategoryName] = useState([]);
   const [searchdata, setSearchdata] = useState("");
-  const [pagenumber, setPageNumber] = useState(0);
-  const [number, setNumber] = useState(0);
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => {
-    setShow(true);
-  };
+  const [category, setCategory] = useState([]);
+
+  console.log(isLoading);
   let { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     setIsLoading(true);
     axios
+      .get("http://localhost:8080/category/searchAll")
+      .then((res) => {
+        console.log(res.data);
+        setCategory(res.data);
+      })
+      .catch((err) => console.log(err));
+    axios
       .get(
-        `http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=10&status=active`
+        `http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=30&status=active`
       )
       .then((res) => {
         setProductList(res.data);
         setProductCategory(res.data);
-        setIsLoading(false);
       })
       .catch((err) => console.log(err));
-  }, []);
-  console.log(productCategory);
+    setIsLoading(false);
+  }, [data]);
+  const productAll = () => {
+    setData(productList);
+  };
   const selectCategory = (id) => {
+    console.log(id)
     setIsLoading(true);
-    axios
-      .get(`http://localhost:8080/category/search/${id}`)
-      .then((res) => {
-        console.log(res.data);
-        setProductCategory(
-          productList.filter(
-            (product) => product.idCategory === res.data.idCategory
-          )
-        );
-        setIsLoading(false);
-      })
-      .catch((err) => console.log(err));
-  };
-  const changePage = (type) => {
-    if (type === "next") {
-      setPageNumber(pagenumber + 1);
-    } else {
-      setPageNumber(pagenumber - 1);
-    }
-  };
-  const addToCart = (id, amount) => {
-    axiosx
-      .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {
-        amount: amount,
-      })
-      .then(() => {
-        enqueueSnackbar("Đã thêm vào giỏ", { variant: "success" });
-        navigate("/carts");
-      })
-      .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
-  };
-  const allCategory = () => {
-    setIsLoading(true);
-    axiosx
-      .get("/product/selectAll")
-      .then((res) => {
-        setProductCategory(res.data.filter((item) => item.status === "active"));
-        setIsLoading(false);
-      })
-      .catch((err) => console.log(err));
+    console.log(productCategory);
+    setProductCategory(
+      productList.filter((product) => product.idCategory === id && product.amount > 0)
+    );
+    console.log(productCategory);
+    setIsLoading(false);
   };
 
   const searchProduct = () => {
@@ -104,7 +76,7 @@ export default function ProductPage() {
       )
       .then((res) => {
         setProductCategory(res.data);
-        // setNumber(number+1)
+        setIsLoading(false);
       })
       .catch((err) => console.log(err));
   };
@@ -115,143 +87,172 @@ export default function ProductPage() {
         <h1 className="text-uppercase me-5 mb-5 sticky-top border-underline w-100 py-3 bg-white">
           Sản phẩm
         </h1>
-        <Category allCategory={allCategory} selectCategory={selectCategory} />
-        <Row>
-          <Col xs={6}>
-            <div className="input-group  mb-3">
-              <input
-                onChange={(e) => setSearchdata(e.target.value)}
-                type="text"
-                className="form-control"
-                placeholder="search..."
-              />
-              <button
-                onClick={searchProduct}
-                className="btn btn-warning"
-                type="button"
-                id="button-addon2"
-              >
-                Tìm Kiếm
-              </button>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          {isLoading ? (
-            <div className="spinner-border text-danger" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          ) : (
-            productCategory.map((product, index) => (
-              <div
-                className="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3"
-                key={index}
-              >
-                <div className="border border-primary mb-3">
-                  <div className="w-100">
-                    <Card>
-                      <img
-                        src={product.urlFile[0]}
-                        style={{ width: "100%", height: "300px" }}
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                          {product.productName}
-                        </Typography>
-                        <Typography
-                          gutterBottom
-                          variant="body2"
-                          color="text.secondary"
-                          component="div"
-                        >
-                          <Badge
-                            className="me-2"
-                            bg="danger"
-                            onClick={() => selectCategory(product.idProduct)}
-                          >
-                            {product.categoryName}
-                          </Badge>
-                          <Badge bg="warning">Giá: </Badge>
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(product.price)}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          className="limit-text fs-13"
-                          color="text.secondary"
-                        >
-                          {product.description}
-                        </Typography>
-                      </CardContent>
-                      <div className="d-flex justify-content-center">
-                        <CardActions>
-                          {product.amount == 0 ? (
-                            <span className="btn btn-sm rounded-1 btn-danger disabled">
-                              Hết hàng
-                            </span>
-                          ) : (
-                            <Button 
-                              onClick={() => addToCart(product.idProduct, product.amount)}
-                              size="small"
-                              variant="contained"
-                              color="success"
-                            >
-                              Thêm vào giỏ
-                            </Button>
-                          )}
-                          <Link
-                            to={`/product/${product.idProduct}`}
-                            className="ms-2"
-                          >
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="info"
-                            >
-                              Chi tiết
-                            </Button>
-                          </Link>
-                        </CardActions>
-                      </div>
-                    </Card>
+        {productList.length > 0 && category.length > 0 ? (
+          <div>
+            <div className="row text-center">
+              {category.map((item) => (
+                <div
+                  onClick={() => selectCategory(item.idCategory)}
+                  key={item.idCategory}
+                  className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
+                >
+                  <div className="category-color pe-2">
+                    <span>{item.categoryName}</span>
                   </div>
                 </div>
+              ))}
+              <div
+                onClick={productAll}
+                className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
+              >
+                <div className="category-color pe-2">
+                  <span>Tất cả sản phẩm</span>
+                </div>
               </div>
-            ))
-          )}
-        </Row>
-        <nav aria-label="Page navigation example">
-          <ul class="pagination">
-            <li class="page-item">
-              <a className="page-link" onClick={() => changePage("back")}>
-                Previous
-              </a>
-            </li>
-            <li class="page-item">
-              <a className="page-link" href="#">
-                1
-              </a>
-            </li>
-            <li class="page-item">
-              <a className="page-link" href="#">
-                2
-              </a>
-            </li>
-            <li class="page-item">
-              <a className="page-link" href="#">
-                3
-              </a>
-            </li>
-            <li class="page-item">
-              <a className="page-link" onClick={() => changePage("next")}>
-                Next
-              </a>
-            </li>
-          </ul>
-        </nav>
-        {/* {data.totalPage > 1 && <myPagination total={data.totalPage} current={page} onChange={handleChangePage} />} */}
+            </div>
+
+            <Row>
+              <Col xs={6}>
+                <div className="input-group  mb-3">
+                  <input
+                    onChange={(e) => setSearchdata(e.target.value)}
+                    type="text"
+                    className="form-control"
+                    placeholder="search..."
+                  />
+                  <button
+                    onClick={searchProduct}
+                    className="btn btn-warning"
+                    type="button"
+                    id="button-addon2"
+                  >
+                    Tìm Kiếm
+                  </button>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              {isLoading ? (
+                <div className="spinner-border text-danger" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              ) : productCategory.length > 0 ? (
+                <div className=" overflow-auto row"  style={{height: '500px'}}>
+                  {productCategory.map(
+                    (product, index) =>
+                      product.amount > 0 && (
+                        <div
+                          className="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3"
+                          key={index}
+                        >
+                          <div className="border border-primary mb-3">
+                            <div className="w-100">
+                              <Link
+                                to={`/product/${product.idProduct}`}
+                                className="text-decoration-none text-black"
+                              >
+                                <Card>
+                                  <img
+                                    src={product.urlFile[0]}
+                                    style={{ width: "100%", height: "300px" }}
+                                  />
+                                  <CardContent>
+                                    <Typography
+                                      gutterBottom
+                                      variant="h5"
+                                      component="div"
+                                    >
+                                      {product.productName}
+                                    </Typography>
+                                    <Typography
+                                      gutterBottom
+                                      variant="body2"
+                                      color="text.secondary"
+                                      component="div"
+                                    >
+                                      <Badge
+                                        className="me-2"
+                                        bg="danger"
+                                        onClick={() =>
+                                          selectCategory(product.idProduct)
+                                        }
+                                      >
+                                        {product.categoryName}
+                                      </Badge>
+                                      <Badge bg="warning">Giá: </Badge>
+                                      {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                      }).format(product.price)}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      className="limit-text fs-13"
+                                      color="text.secondary"
+                                    >
+                                      {product.description}
+                                    </Typography>
+                                  </CardContent>
+                                  <div className="d-flex justify-content-center">
+                                    {user.id === product.idUser ? (
+                                      <CardActions>
+                                        <Link
+                                          to={`/product/update/${product.idProduct}`}
+                                        >
+                                          <span className="btn btn-outline-warning btn-sm rounded-1">
+                                            Chỉnh sửa
+                                          </span>
+                                        </Link>
+                                        <Link
+                                          to={`/product/${product.idProduct}`}
+                                          className="ms-2"
+                                        >
+                                          <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="info"
+                                          >
+                                            Chi tiết
+                                          </Button>
+                                        </Link>
+                                      </CardActions>
+                                    ) : (
+                                      <CardActions>
+                                        <Link
+                                          to={`/product/${product.idProduct}`}
+                                          className="ms-2"
+                                        >
+                                          <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="info"
+                                          >
+                                            Chi tiết
+                                          </Button>
+                                        </Link>
+                                      </CardActions>
+                                    )}
+                                  </div>
+                                </Card>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                  )}
+                </div>
+              ) : (
+                <div className="col-12">
+                  <div className="alert alert-primary" role="alert">
+                    Không có sản phẩm nào.
+                  </div>
+                </div>
+              )}
+            </Row>
+          </div>
+        ) : (
+          <Spinner />
+        )}
       </div>
       <Footer />
     </div>

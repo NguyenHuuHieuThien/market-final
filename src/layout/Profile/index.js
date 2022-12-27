@@ -65,7 +65,7 @@ export default function ProfilePage() {
         </div>
       ) : (
         <BgUser>
-          <ModalReact
+          {/* <ModalReact
             children={
               <div>
                 <div class="form-floating mb-3">
@@ -93,14 +93,14 @@ export default function ProfilePage() {
             handleClose={handleClose}
             show={show}
             title="Đổi mật khẩu"
-          ></ModalReact>
+          ></ModalReact> */}
           <MDBRow>
             <MDBCol lg="4">
               <MDBCard className="mb-4">
                 <MDBCardBody className="text-center shadow-sm">
                   <div className="d-flex justify-content-center">
                     <MDBCardImage
-                      src={userInfo?.urlImageSet[0]?? user?.fileList[0].fileDownloadUri}
+                      src={userInfo ? userInfo?.urlImageSet[userInfo.urlImageSet.length-1]: "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png" }
                       alt="avatar"
                       className="rounded-pill"
                       style={{ width: "150px", height: "150px" }}
@@ -108,16 +108,10 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="mt-3 mb-4">
-                    <span className="text-muted mb-1 d-block ">
+                    <span className="fw-bold mb-1 d-block ">
                       {userInfo?.username ?? user?.username}
                     </span>
                     <span className="text-muted mb-4">{userInfo?.fullName ?? user?.name}</span>
-                  </div>
-                  <div className="d-flex justify-content-center mb-3">
-                    <MDBBtn>Follow</MDBBtn>
-                    <MDBBtn outline className="ms-1">
-                      Message
-                    </MDBBtn>
                   </div>
                 </MDBCardBody>
               </MDBCard>

@@ -29,21 +29,37 @@ import {
   faBarsProgress,
   faListCheck,
   faCheck,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useLocation } from "react-router-dom";
 import { Collapse } from "react-bootstrap";
 
 import ModalReact from "../../component/Modal";
 
-const profileMenu = [
+const userMenu = [
   { name: "Trang chủ", link: "/", icon: faHome },
-  { name: "Thông báo", link: "/", icon: faBell },
   { name: "Giỏ hàng", link: "/carts", icon: faCartShopping },
+  { name: "Đơn hàng chờ", link: "/user/await", icon: faClock },
+  { name: "Trang cá nhân", link: "/user/profile", icon: faUser },
+  { name: "Xem sản phẩm", link: "/product/list", icon: faTelevision },
+  {
+    name: "Đăng xuất",
+    link: "/",
+    icon: faRightFromBracket,
+    logout: function () {
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+    },
+  },
+];
+const sellerMenu = [
+  { name: "Trang chủ", link: "/", icon: faHome },
+  { name: "Đăng sản phẩm", link: "/product/add", icon: faEdit },
   { name: "Trang cá nhân", link: "/user/profile", icon: faUser },
   { name: "Xem sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Sản phẩm đã đăng", link: "/sell/list", icon: faListCheck },
   { name: "Phê duyệt đơn hàng", link: "/sell/manager", icon: faCheck },
-  { name: "Đăng bài", link: "/product/add", icon: faEdit },
   {
     name: "Đăng xuất",
     link: "/",
@@ -70,7 +86,7 @@ export default function BgUser({ children }) {
   };
   return (
     <div className="bg-main">
-      <ModalReact
+      {/* <ModalReact
         children={
           <div>
             <div class="form-floating mb-3">
@@ -105,7 +121,7 @@ export default function BgUser({ children }) {
         handleClose={handleClose}
         show={show}
         title="Đổi mật khẩu"
-      ></ModalReact>
+      ></ModalReact> */}
       <div className="row">
         <div
           className="col-2 col-sm-2 col-md-2 col-lg-3 col-xl-3 mt-3 bg-white sticky-top rounded-2 mb-3 ms-4 shadow-sm"
@@ -113,32 +129,59 @@ export default function BgUser({ children }) {
         >
           <div className="w-100 ">
             <div className="py-1 mb-3">
-              {profileMenu.map((item, index) => {
-                return (
-                  <Link
-                    to={item.link}
-                    key={index}
-                    onClick={item?.logout}
-                    className={`text-decoration-none text-black ${
-                      (item.name === "Sản phẩm đã đăng" ||
-                        item.name === "Phê duyệt đơn hàng" ||
-                        item.name === "Đăng bài") &&
-                      user.roles[0] === "ROLE_USER" &&
-                      "d-none"
-                    }`}
-                  >
-                    <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex justify-content-between py-3 hover mb-3">
-                      <span>
+              {user.roles[0] === "ROLE_MODERATOR"
+                ? sellerMenu.map((item, index) => (
+                    <Link
+                      to={item.link}
+                      key={index}
+                      onClick={item?.logout}
+                      className={`text-decoration-none text-black`}
+                    >
+                      <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex justify-content-between py-3 hover mb-3">
                         <span>
-                          <FontAwesomeIcon icon={item.icon} className="me-2" />{" "}
+                          <span>
+                            <FontAwesomeIcon
+                              icon={item.icon}
+                              className="me-2"
+                            />{" "}
+                          </span>
+                          <span className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block">
+                            {item.name}
+                          </span>
                         </span>
-                        <span className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block">{item.name}</span>
-                      </span>
-                      <FontAwesomeIcon className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block" icon={faChevronRight} />
-                    </div>
-                  </Link>
-                );
-              })}
+                        <FontAwesomeIcon
+                          className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block"
+                          icon={faChevronRight}
+                        />
+                      </div>
+                    </Link>
+                  ))
+                : userMenu.map((item, index) => (
+                    <Link
+                      to={item.link}
+                      key={index}
+                      onClick={item?.logout}
+                      className={`text-decoration-none text-black`}
+                    >
+                      <div className="d-block d-sm-block d-md-block d-lg-flex d-xl-flex justify-content-between py-3 hover mb-3">
+                        <span>
+                          <span>
+                            <FontAwesomeIcon
+                              icon={item.icon}
+                              className="me-2"
+                            />{" "}
+                          </span>
+                          <span className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block">
+                            {item.name}
+                          </span>
+                        </span>
+                        <FontAwesomeIcon
+                          className="d-none d-sm-none d-md-inline-block d-lg-inline-block d-xl-inline-block"
+                          icon={faChevronRight}
+                        />
+                      </div>
+                    </Link>
+                  ))}
             </div>
           </div>
         </div>
@@ -146,9 +189,12 @@ export default function BgUser({ children }) {
           <MDBContainer className="ms-2">
             <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex justify-content-between bg-white p-3 rounded-3 mb-3 shadow-sm  sticky-top">
               <div>
+                {user.roles[0] === "ROLE_MODERATOR" &&
                 <Link to="/product/add">
-                  <button className="btn btn-primary me-2">Đăng tin</button>
-                </Link>
+                <button className="btn btn-primary me-2">
+                  Đăng sản phẩm
+                </button>
+              </Link>}
                 {path && (
                   <Link to={`/user/update/${user.id}`}>
                     <button className="btn btn-success me-2">
@@ -156,12 +202,12 @@ export default function BgUser({ children }) {
                     </button>
                   </Link>
                 )}
-                <button
+                {/* <button
                   className="btn btn-info me-2"
                   onClick={() => setShow(true)}
                 >
                   Đổi mật khẩu
-                </button>
+                </button> */}
               </div>
               <button onClick={logout} className="btn btn-danger rounded-5">
                 Đăng xuất

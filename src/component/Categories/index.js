@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import { axiosx as axios } from "../../Helper";
-function Category({ selectCategory, allCategory}) {
+function Category({ selectCategory, allCategory, done}) {
   const [categories, setCategories] = useState([]);
+  const [isdone, setIsDone] = useState(false)
+  const setDone = (isDone) => {
+    done(isDone)
+  }
   useEffect(() => {
     if (axios) {
       axios
         .get("/category/searchAll")
-        .then((res) => setCategories(res.data))
+        .then((res) => {
+          setCategories(res.data)
+          setDone(true)
+        })
         .catch((err) => console.log(err));
     }
   }, []);
   return (
-    <div className="row">
+    <>
     {categories &&
       categories.length > 0 &&
       categories.map((item,index) => (
@@ -25,7 +32,7 @@ function Category({ selectCategory, allCategory}) {
           </div>
         </div>
       ))}
-  </div>
+  </>
   );
 }
 

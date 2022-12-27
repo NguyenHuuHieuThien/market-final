@@ -100,24 +100,10 @@ export default function AddproductPage() {
   };
   return (
     <div>
-      {!user|| user.roles[0] === "ROLE_USER"  ? (
-        <div>
-          <div class="alert alert-danger" role="alert">
-            Bạn không có quyền truy cập. Để được đăng sản phẩm bạn hãy đăng ký
-            một tài khoản mới với cấp độ người bán
-          </div>
-          <Link to="/">
-            <button className="btn btn-warning text-white">
-              <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-              Quay lại
-            </button>
-          </Link>
-        </div>
-      ) : (
         <BgUser>
           <form onSubmit={(e) => submit(e)}>
             <div className="ms-3 me-3 py-3 text-start">
-              <h1 className="mb-5">Đăng bán Sản phẩm</h1>
+              <h1 className="mb-5">Đăng Sản phẩm</h1>
               {id ? (
                 <div>
                   <div className="row">
@@ -154,41 +140,19 @@ export default function AddproductPage() {
                       </div>
                     </div>
                     <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                      <div className="row p-0">
-                        <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                          <div class="mb-3">
-                            <label for="amount" class="form-label fw-bold">
-                              Số lượng
-                            </label>
-                            <input
-                              onChange={(e) => handle(e)}
-                              required
-                              type="text"
-                              value={dataUpdate.amount}
-                              placeholder="Nhập số lượng..."
-                              class="form-control"
-                              id="amount"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                          <div class="mb-3">
-                            <label for="tradePark" class="form-label fw-bold">
-                              Trade Park
-                            </label>
-                            <input
-                              disabled
-                              onChange={(e) => handle(e)}
-                              required
-                              value={dataUpdate && dataUpdate.tradePark}
-                              type="text"
-                              placeholder="Nhập trade park..."
-                              class="form-control"
-                              id="tradePark"
-                            />
-                          </div>
-                        </div>
+                      <div class="mb-3">
+                        <label for="amount" class="form-label fw-bold">
+                          Số lượng
+                        </label>
+                        <input
+                          onChange={(e) => handle(e)}
+                          required
+                          type="text"
+                          value={dataUpdate.amount}
+                          placeholder="Nhập số lượng..."
+                          class="form-control"
+                          id="amount"
+                        />
                       </div>
                       <div class="mb-3">
                         <label for="productName" class="form-label fw-bold">
@@ -274,37 +238,18 @@ export default function AddproductPage() {
                       </div>
                     </div>
                     <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                      <div className="row">
-                        <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                          <div class="mb-3">
-                            <label for="amount" class="form-label fw-bold">
-                              Số lượng
-                            </label>
-                            <input
-                              onChange={(e) => handle(e)}
-                              required
-                              type="text"
-                              placeholder="Nhập số lượng..."
-                              class="form-control"
-                              id="amount"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6">
-                          <div class="mb-3">
-                            <label for="tradePark" class="form-label fw-bold">
-                              Trade Park
-                            </label>
-                            <input
-                              onChange={(e) => handle(e)}
-                              required
-                              type="text"
-                              placeholder="Nhập trade park..."
-                              class="form-control"
-                              id="tradePark"
-                            />
-                          </div>
-                        </div>
+                      <div class="mb-3">
+                        <label for="amount" class="form-label fw-bold">
+                          Số lượng
+                        </label>
+                        <input
+                          onChange={(e) => handle(e)}
+                          required
+                          type="text"
+                          placeholder="Nhập số lượng..."
+                          class="form-control"
+                          id="amount"
+                        />
                       </div>
                       <div class="mb-3">
                         <label for="productName" class="form-label fw-bold">
@@ -365,7 +310,6 @@ export default function AddproductPage() {
             </div>
           </form>
         </BgUser>
-      )}
     </div>
   );
 }

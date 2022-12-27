@@ -12,15 +12,18 @@ import {
   faUserPlus,
   faClipboardList,
   faRightFromBracket,
-  faCheck
+  faCheck,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Tippy from "@tippyjs/react/headless";
 import "tippy.js/dist/tippy.css"; // optional
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import logo from "../../assets/images/logo.png";
+import { axiosx as axios } from "../../Helper";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 export default function Navbars() {
   const menu = {
     menu1: [
@@ -65,17 +68,45 @@ export default function Navbars() {
       link: "/user/profile",
     },
     {
-      name: "Đăng bài",
+      name: "Đơn hàng đang chờ xác nhận",
+      icon: faClock,
+      link: "/user/await",
+    },
+    {
+      name: "Sản phẩm đã mua",
+      icon: faClipboardList,
+      link: "/user/profile",
+    },
+    {
+      name: "Đăng xuất",
+      icon: faRightFromBracket,
+      logout: function () {
+        localStorage.clear();
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      },
+    },
+  ];
+
+  const sellerMenu = [
+    {
+      name: "Trang cá nhân",
+      icon: faUser,
+      link: "/user/profile",
+    },
+    {
+      name: "Đăng sản phẩm",
       icon: faPenToSquare,
       link: "/product/add",
     },
     {
-      name: "Phê duyệt đơn hàng",
+      name: "Đơn hàng đang chờ duyệt",
       icon: faCheck,
       link: "/sell/manager",
     },
     {
-      name: "Bài viết đã đăng",
+      name: "Sản phẩm đã đăng bán",
       icon: faClipboardList,
       link: "/user/posted",
     },
@@ -85,127 +116,138 @@ export default function Navbars() {
       logout: function () {
         localStorage.clear();
         setTimeout(() => {
-          window.location.href = "/"
+          window.location.href = "/";
         }, 1000);
       },
     },
   ];
-  let user = JSON.parse(localStorage.getItem('token'))
+  const [data, setData] = useState([]);
+  const [notireaded, setNotiReaded] = useState([]);
+  const [notinumber, setNotiNumber] = useState(0);
+  const [bg, setBg] = useState("bg-spotlight");
+  let navigate = useNavigate();
+  let user = JSON.parse(localStorage.getItem("token"));
+  useEffect(() => {
+    if (axios) {
+      axios
+        .get(`/notification/findByIdUser/${user.id}`)
+        .then((res) => {
+          setNotiReaded(
+            res.data.filter((item) => item.status === "1").map((e) => e.id)
+          );
+          setNotiNumber(res.data.filter((item) => item.status === "1").length);
+          setData(res.data);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, []);
+  console.log(notinumber);
 
+  const readNoti = (id, message, idproduct) => {
+    console.log(message)
+    axios
+      .put(`/notification/updateStatus/${id}`)
+      .then(() => {
+        // setNotiReaded(notireaded.filter(item => item !== id))
+        // setNotiNumber(notireaded.filter(item => item !== id).length)
+        if (idproduct.length > 0) {
+          navigate(`/product/${idproduct}`);
+        } else {
+          switch (message) {
+            case String(message).includes(/gửi/g):
+              console.log(message)
+              navigate("/sell/manager");
+              break;
+            case message.includes("deleted") || message.includes("active"):
+              navigate("/user/await");
+              break;
+            default:
+              navigate("/");
+              break;
+          }
+        }
+      })
+      .catch((err) => console.log(err));
+  };
   return (
     <div>
       <div className="bg-nav" id="navbar-bg">
         <Navbar collapseOnSelect expand="lg" variant="dark">
           <Container>
-            <Link to="/">
+            <Link to="/" className="d-flex justify-content-start">
               <img
-                className="w-75 navbar-brand"
+                className="navbar-brand text-start w-75"
                 src="https://static.chotot.com/storage/marketplace/transparent_logo.png"
               />
             </Link>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse id="responsive-navbar-nav"  className="text-start">
+            <Navbar.Collapse id="responsive-navbar-nav" className="text-start">
               <Nav className="me-auto ms-3">
                 {menu.menu1.map((item, index) =>
                   item.name === "Thông báo" ? (
-                    <div className="mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0" key={index}>
-
-                    <Tippy
-                    key={index}
-                      interactive
-                      placement="bottom"
-                      render={(attrs) => (
-                        <div
-                          className="box bg-white py-2 sticky-top shadow-sm rounded-2"
-                          style={{ width: "350px" }}
-                          tabIndex="-1"
-                          {...attrs}
-                        >
-                          <ul className="p-0 text-start">
-                            <li role="button" className="mb-2 hover px-3 py-1">
-                              <div className="d-flex align-items-center justify-content-between">
-                                <div className="me-2">
-                                  <img
-                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
-                                    width="60px"
-                                    height="60px"
-                                    className="rounded-5"
-                                  />
-                                </div>
-                                <div>
-                                  <span
-                                    className="fw-bold me-1"
-                                    style={{ fontSize: "14px" }}
-                                  >
-                                    Hiếu Thiên
-                                  </span>
-                                  <span style={{ fontSize: "14px" }}>
-                                    Đã bình luận về bài viết của bạn trên hệ
-                                    thống
-                                  </span>
-                                </div>
-                              </div>
-                            </li>
-                            <li role="button" className="mb-2 hover px-3 py-1">
-                              <div className="d-flex align-items-center justify-content-between">
-                                <div className="me-2">
-                                  <img
-                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
-                                    width="60px"
-                                    height="60px"
-                                    className="rounded-5"
-                                  />
-                                </div>
-                                <div>
-                                  <span
-                                    className="fw-bold me-1"
-                                    style={{ fontSize: "14px" }}
-                                  >
-                                    Hiếu Thiên
-                                  </span>
-                                  <span style={{ fontSize: "14px" }}>
-                                    Đã bình luận về bài viết của bạn trên hệ
-                                    thống
-                                  </span>
-                                </div>
-                              </div>
-                            </li>
-                            <li role="button" className="hover px-3 py-1">
-                              <div className="d-flex align-items-center justify-content-between">
-                                <div className="me-2">
-                                  <img
-                                    src="https://yt3.ggpht.com/ytc/AMLnZu9iJXDiUSZ9az5rgL2JOIGSfRpZmjHSGQia6Ks5hA=s900-c-k-c0x00ffffff-no-rj"
-                                    width="60px"
-                                    height="60px"
-                                    className="rounded-5"
-                                  />
-                                </div>
-                                <div>
-                                  <span
-                                    className="fw-bold me-1"
-                                    style={{ fontSize: "14px" }}
-                                  >
-                                    Hiếu Thiên
-                                  </span>
-                                  <span style={{ fontSize: "14px" }}>
-                                    Đã bình luận về bài viết của bạn trên hệ
-                                    thống
-                                  </span>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
+                    <div
+                      className="mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0"
+                      key={index}
                     >
-                      <div className="me-2">
-                        <FontAwesomeIcon
-                          icon={item.icon}
-                          className="text-white"
-                        />
-                        <span className="text-white ms-2">{item.name}</span>
-                      </div>
-                    </Tippy>
+                      <Tippy
+                        key={index}
+                        interactive
+                        placement="bottom"
+                        render={(attrs) => (
+                          <div
+                            className="box bg-white py-2 sticky-top shadow-sm rounded-2"
+                            style={{
+                              width: "350px",
+                              height: "300px",
+                              overflow: "scroll",
+                            }}
+                            tabIndex="-1"
+                            {...attrs}
+                          >
+                            <ul
+                              className="px-2 text-start"
+                              style={{ listStyle: "none" }}
+                            >
+                              {data.length > 0 ? (
+                                data.map((item, index) => (
+                                  <li
+                                    onClick={() =>
+                                      readNoti(item.id, item.message, "")
+                                    }
+                                    key={index}
+                                    role="button"
+                                    className={`mb-2 ${
+                                      notireaded.includes(item.id)
+                                        ? "bg-spotlight"
+                                        : "bg-transparent"
+                                    } hover p-3 py-1`}
+                                  >
+                                    <span>{item.message}</span>
+                                  </li>
+                                ))
+                              ) : (
+                                <li
+                                  role="button"
+                                  className="mb-2 hover px-3 py-1"
+                                >
+                                  <span>Không có thông báo nào</span>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      >
+                        <div className="me-2 position-relative">
+                          <FontAwesomeIcon
+                            icon={item.icon}
+                            className="text-white me-1 position-relative"
+                          />
+                          <span className="text-white">{item.name}</span>
+                          <span class="position-absolute top-0 start-0 translate-middle badge badge-sm rounded-pill bg-danger">
+                            {notinumber > 0 ? notinumber : ""}
+                          </span>
+                        </div>
+                      </Tippy>
                     </div>
                   ) : (
                     <Link
@@ -216,7 +258,7 @@ export default function Navbars() {
                         color: "white",
                         marginRight: "10px",
                       }}
-                      className='mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0'
+                      className="mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0"
                     >
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
@@ -232,60 +274,108 @@ export default function Navbars() {
                       placement="bottom-end"
                       render={(attrs) => (
                         <div
-                          className="box bg-white text-center p-3 rounded-2"
+                          className="box bg-white  shadow-sm text-center p-3 rounded-2"
                           style={{ position: "relative", right: "10%" }}
                           tabIndex="-1"
                           {...attrs}
                         >
-
-                            {user.roles[0]==="ROLE_ADMIN"&& 
-                            <Link to="/admin/users"
-                            style={{ textDecoration: "none" }}
-                          >
-                            <div className="nav-profile-detail-item text-black py-2 text-start">
-                              <FontAwesomeIcon
-                                icon={faHome}
-                                className="me-4"
-                              />
-                              Đi tới Admin
+                          <div className="p-3  px-5 rounded-2 shadow-sm">
+                            <Link to="/user/profile" className="text-decoration-none text-black">
+                            <div className="d-flex">
+                              <div className="me-2">
+                                <img
+                                  src={
+                                    user.fileList[0]
+                                      ? user.fileList[0].fileDownloadUri
+                                      : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
+                                  }
+                                  width="25px"
+                                  height="25px"
+                                  className="rounded-pill"
+                                />
+                              </div>
+                              <div>
+                                <span className="fw-bold">{user.name}</span>
+                              </div>
                             </div>
-                          </Link>}
-                          {userMenu.map((item, index)=>
-                            <Link                            
-                              to={item.link}
-                              onClick={item?.logout}
-                              style={{ textDecoration: "none"}}
-                              key={index}
+                              <div>Xem trang cá nhân</div>
+                              </Link>
+                          </div>
+                          {user.roles[0] === "ROLE_ADMIN" && (
+                            <Link
+                              to="/admin/users"
+                              style={{ textDecoration: "none" }}
                             >
-                              <div className="nav-profile-detail-item py-2 text-black text-start">
+                              <div className="nav-profile-detail-item text-black py-2 text-start">
                                 <FontAwesomeIcon
-                                  icon={item.icon}
+                                  icon={faHome}
                                   className="me-4"
                                 />
-                                {item.name}
+                                Đi tới Admin
                               </div>
-                            </Link>)}                                          
+                            </Link>
+                          )}
+
+                          {user.roles[0] === "ROLE_MODERATOR"
+                            ? sellerMenu.map((item, index) => (
+                                <Link
+                                  to={item.link}
+                                  onClick={item?.logout}
+                                  style={{ textDecoration: "none" }}
+                                  key={index}
+                                >
+                                  <div className="nav-profile-detail-item text-black py-2 text-start">
+                                    <FontAwesomeIcon
+                                      icon={item.icon}
+                                      className="me-4"
+                                    />
+                                    {item.name}
+                                  </div>
+                                </Link>
+                              ))
+                            : userMenu.map((item, index) => (
+                                <Link
+                                  to={item.link}
+                                  onClick={item?.logout}
+                                  style={{ textDecoration: "none" }}
+                                  key={index}
+                                >
+                                  <div className="nav-profile-detail-item py-2 text-black text-start">
+                                    <FontAwesomeIcon
+                                      icon={item.icon}
+                                      className="me-4"
+                                    />
+                                    {item.name}
+                                  </div>
+                                </Link>
+                              ))}
                         </div>
                       )}
                     >
                       <div className="d-flex ms-3 mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0 justify-content-sm-start justify-content-md-start justify-content-lg-center justify-content-xl-center align-items-center">
                         <div className="me-3">
                           <img
-                            src={user.fileList[0].fileDownloadUri}
+                            src={
+                              user.fileList[0]
+                                ? user.fileList[0].fileDownloadUri
+                                : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
+                            }
                             width="50px"
                             height="50px"
                             className="rounded-pill"
                           />
                         </div>
-                        {/* <div>
-                        <span>Hiếu Thiên</span>
-                      </div> */}
                       </div>
                     </Tippy>
                   </div>
                 ) : (
                   menu.menu2.map((item, index) => (
-                    <Link key={index} style={{ textDecoration: "none"}} className="text-white me-3" to={item.link}>
+                    <Link
+                      key={index}
+                      style={{ textDecoration: "none" }}
+                      className="text-white me-3"
+                      to={item.link}
+                    >
                       <FontAwesomeIcon icon={item.icon} />
                       <span className="ms-2">{item.name}</span>
                     </Link>

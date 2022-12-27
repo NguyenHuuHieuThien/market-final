@@ -22,12 +22,13 @@ import {
 import { MDBInputGroup, MDBBtn, MDBBadge, MDBIcon } from "mdb-react-ui-kit";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import Spinner from "../../component/Spinner";
 const profileMenu = [
   { name: "Trang chủ người dùng", link: "/", icon: faHome },
   { name: "Trang sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Danh sách người dùng", link: "/admin/users", icon: faList },
   { name: "Phê duyệt bài đăng", link: "/admin/product/manager", icon: faCheck },
-  { name: "Quản lý sản phẩm", link: "/admin/product/list", icon: faList },
+  { name: "Quản lý sản phẩm", link: "/admin/products", icon: faList },
   { name: "Đăng xuất", link: "/", icon: faRightFromBracket },
 ];
 const actions = [
@@ -87,8 +88,8 @@ export default function ProductManager() {
   const [checkList, setCheckList] = useState([]);
   const [ids, setIds] = useState([products.length>0?products.map(item=> item.idProduct):[]])
   const [id, setId] = useState();
+  const [isLoading, setIsLoading] = useState(false)
   const handleClose = () => setShow(false);
-  console.log(products)
   let user = JSON.parse(localStorage.getItem("token"));
   const handleShow = (id) => {
     setShow(true);
@@ -118,13 +119,16 @@ export default function ProductManager() {
       );
   };
   useEffect(() => {
+    setIsLoading(true)
     axios
       .get("/product/selectAll")
       .then((res) => {
         setProducts(res.data.filter((item) => item.status === "pending"));
+        setIsLoading(false)
       })
       .catch((err) => {
         console.log(err);
+        setIsLoading(false)
       });
   }, [ids]);
   const checkAll = () => {
@@ -168,19 +172,6 @@ export default function ProductManager() {
   };
   return (
     <div>
-      {!user||user.roles[0] !== "ROLE_ADMIN" ? (
-       <div>
-       <div class="alert alert-danger" role="alert">
-         Bạn không có quyền truy cập vào trang quản lý.
-       </div>
-       <Link to="/">
-         <button className="btn btn-warning text-white">
-           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-           Quay lại
-         </button>
-       </Link>
-     </div>
-      ) : (
         <div className="mt-4">
           <Modal
             show={show}
@@ -296,12 +287,17 @@ export default function ProductManager() {
                       <th>Giá</th>
                       <th>Số Lượng</th>
                       <th>Ngày Đăng</th>
-                      <th>Trade park</th>
                       <th>Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {products && products?.length > 0 ? (
+                    {isLoading ? 
+                    <tr>
+                      <td colSpan={7}>
+                        <Spinner/>
+                      </td>
+                    </tr>
+                    :products && products?.length > 0 ? (
                       products.map((product, index) => (
                         <tr key={index}>
                           <td>
@@ -327,7 +323,6 @@ export default function ProductManager() {
                           <td>{product.price}</td>
                           <td>{product.amount}</td>
                           <td>{product.date}</td>
-                          <td>{product.tradePark}</td>
                           <td>
                             <button
                               type="button"
@@ -357,7 +352,6 @@ export default function ProductManager() {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }

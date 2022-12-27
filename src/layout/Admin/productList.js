@@ -1,22 +1,22 @@
 import { axiosx as axios} from "../../Helper";
 import Table from "react-bootstrap/Table";
-import { Button } from "react-bootstrap";
+import { Button} from "react-bootstrap";
+import Spinner from "../../component/Spinner";
 import React, { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faPlus,
   faTrash,
-  faArrowsRotate,
   faCheckDouble,
   faChevronRight,
-  faTrashCan,
   faArrowLeft,
   faRightFromBracket,
   faCheck,
   faList,
   faHome,
   faTelevision,
+  faSearch,
+  faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import { MDBInputGroup, MDBBtn } from "mdb-react-ui-kit";
 import { Link } from "react-router-dom";
@@ -35,7 +35,10 @@ export default function ProductList() {
   const [show, setShow] = useState(false);
   const [products, setProducts] = useState([]);
   const [isCheckAll, setIsCheckAll] = useState(false);
+  const [isLoading , setIsLoading] = useState(false);
+  const [data, setData] = useState(products.length > 0 ? products: [])
   const [checkList, setCheckList] = useState([]);
+  const [searchdata, setSearchdata] = useState("");
   const [id, setId] = useState();
   const handleClose = () => setShow(false);
   const handleShow = (id) => {
@@ -48,23 +51,42 @@ export default function ProductList() {
       .put(`/product/deleteListProduct/${id}?status=deleted`)
       .then(() => {
         handleClose();
+        setProducts(products.filter(item => item.idProduct !== id))
         enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" });
       })
       .catch((err) =>
         enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" })
       );
   };
+  const reload =()=> {
+    setData(products)
+  }
+  const searchProduct = () => {
+    axios
+      .get(
+        `/product/selectByParamProductPaging?param=${String(
+          searchdata
+        )}&pageNo=0&pageSize=10&status=active`
+      )
+      .then((res) => {
+        setProducts(res.data);
+        // setNumber(number+1)
+      })
+      .catch((err) => console.log(err)); 
+  };
+  console.log(isLoading)
   useEffect(() => {
-    if(axios){
+    setIsLoading(true)
       axios
       .get("/product/selectAll")
       .then((res) => {
         setProducts(res.data.filter((item) => item.status === "active"));
+        setIsLoading(false)
       })
       .catch((err) => {
-        console.log(err);
+        enqueueSnackbar("Không thể tải lên danh sách sản phẩm!!!", {variant: 'error'})
+
       });
-    }
   }, []);
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);
@@ -87,28 +109,16 @@ export default function ProductList() {
       .put(`/product/deleteListProduct/${checkList}?status=deleted`)
       .then(() => {
         handleClose();
+        setData(products.filter(item=> !checkList.includes(item.idProduct)))
         enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" });
       })
       .catch((err) =>
-        enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" })
+        enqueueSnackbar("Bỏ bài đăng không thành công", { variant: "error" })
       );
   };
 
   return (
     <div>
-      {!user||user.roles[0] !== "ROLE_ADMIN" ? (
-       <div>
-       <div class="alert alert-danger" role="alert">
-         Bạn không có quyền truy cập vào trang quản lý.
-       </div>
-       <Link to="/">
-         <button className="btn btn-warning text-white">
-           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-           Quay lại
-         </button>
-       </Link>
-     </div>
-      ) : (
         <div className="mt-4 bg-main" style={{ minHeight: "100vh" }}>
           <Modal
             show={show}
@@ -189,15 +199,23 @@ export default function ProductList() {
                           Xóa nhiều
                         </button>
                       )}
+                      <button onClick={reload} className="btn btn-warning text-white">
+                        <FontAwesomeIcon className="me-2" icon={faArrowsRotate}/>
+                        Tải lại
+                        </button>
                     </div>
                     <div className="col-6">
                       <MDBInputGroup className=" d-flex align-items-center">
                         <input
+                        onChange={(e) => setSearchdata(e.target.value)}
                           className="form-control"
                           placeholder="Nhập điều kiện..."
                           type="text"
                         />
-                        <MDBBtn outline>Tìm kiếm</MDBBtn>
+                        <button className="btn btn-outline-success" onClick = {searchProduct} outline>
+                          <FontAwesomeIcon className="me-2" icon={faSearch}/>
+                          Tìm kiếm
+                          </button>
                       </MDBInputGroup>
                     </div>
                   </div>
@@ -212,13 +230,16 @@ export default function ProductList() {
                       <th>Tên</th>
                       <th>Giá</th>
                       <th>Số Lượng</th>
-                      <th>Ngày Đăng</th>
-                      <th>Trade park</th>
                       <th>Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {products && products?.length > 0 ? (
+                    {isLoading ? 
+                    (<tr>
+                      <td colSpan={6}><Spinner/></td>
+                    </tr>)
+                     : 
+                     (products?.length > 0 ? (
                       products.map((product, index) => (
                         <tr key={index}>
                           <td>
@@ -243,8 +264,6 @@ export default function ProductList() {
                           <td>{product.productName}</td>
                           <td>{product.price}</td>
                           <td>{product.amount}</td>
-                          <td>{product.date}</td>
-                          <td>{product.tradePark}</td>
                           <td>
                             <button
                               type="button"
@@ -260,14 +279,13 @@ export default function ProductList() {
                       <tr>
                         <td colSpan="8">Không có sản phẩm nào.</td>
                       </tr>
-                    )}
+                    ))}
                   </tbody>
                 </Table>
               </div>
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }

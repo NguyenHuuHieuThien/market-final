@@ -27,7 +27,7 @@ const profileMenu = [
   { name: "Đăng xuất", link: "/", icon: faRightFromBracket },
 ];
 
-export default function UserList() {
+export default function OrderList() {
   let {enqueueSnackbar} = useSnackbar();
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -44,12 +44,32 @@ export default function UserList() {
   const [data, setData] = useState([]);
   const [ids, setIds] = useState([data.length>0?data.map(item=> item.idProduct):[]])
   let user = JSON.parse(localStorage.getItem("token"));
+  const checkAll = () => {
+    setIsCheckAll(!isCheckAll);
+    if (!isCheckAll) {
+      setCheckList(data.map((item) => item.idUser));
+    } else {
+      setCheckList([]);
+    }
+  };
+  const checked = (id) => {
+    if (checkList.includes(id)) {
+      setCheckList(checkList.filter((item) => item !== id));
+    } else {
+      setCheckList([...checkList, id]);
+    }
+  };
+
+
+  console.log(data);
   useEffect(() => {
+    // setIsLoading(true);
     if (axios) {
       axios
         .get("/user/user-full")
         .then((res) => {
           setData(res.data.filter((item) => item.status === "active"));
+          // setIsLoading(false);
         })
         .catch((err) => {
           console.log(err);
@@ -71,7 +91,10 @@ export default function UserList() {
         enqueueSnackbar('Không thể xóa người dùng', {variant: 'danger'})
       });
   };
-
+  const deleteAll = () => {
+    // console.log(checkList.toString())
+    console.log(123);
+  };
   const search = () => {
     axios
       .get(`/user/userBy?param=${searchData}`)
@@ -85,6 +108,19 @@ export default function UserList() {
 
   return (
     <div>
+      {!user||user.roles[0] !== "ROLE_ADMIN" ? (
+       <div>
+       <div class="alert alert-danger" role="alert">
+         Bạn không có quyền truy cập vào trang quản lý.
+       </div>
+       <Link to="/">
+         <button className="btn btn-warning text-white">
+           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
+           Quay lại
+         </button>
+       </Link>
+     </div>
+      ) : (
         <div className="mt-4 bg-main">
           <ModalReact
             show={show}
@@ -154,9 +190,8 @@ export default function UserList() {
                           className="form-control"
                           placeholder="Nhập điều kiện..."
                           type="text"
-                          onChange={e=>setSearchData(e.target.value) }
                         />
-                        <button className="btn btn-outline-secondary" onClick={search}>Tìm kiếm</button>
+                        <button className="btn btn-outline-secondary"onClick={search}>Tìm kiếm</button>
                       </MDBInputGroup>
                     </div>
                   </div>
@@ -240,6 +275,7 @@ export default function UserList() {
             </div>
           </div>
         </div>
+      )}
     </div>
   );
 }

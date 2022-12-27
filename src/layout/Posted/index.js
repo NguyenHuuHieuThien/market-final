@@ -19,19 +19,6 @@ export default function Posted() {
   },[])
   return (
     <div>
-      {!user || user.roles[0]==="ROLE_USER"?
-       <div>
-       <div class="alert alert-danger" role="alert">
-         Bạn không có quyền truy cập vào trang này.
-       </div>
-       <Link to="/">
-         <button className="btn btn-warning text-white">
-           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
-           Quay lại
-         </button>
-       </Link>
-     </div>
-      :
       <BgUser>
       <h1 className=" bg-white py-5 rounded-3 border-underline">
         Sản phẩm đã đăng
@@ -56,7 +43,6 @@ export default function Posted() {
         </div>)}
       </div>
     </BgUser>
-      }
     </div>
   );
 }

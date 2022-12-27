@@ -1,45 +1,68 @@
 import ImageGallery from "../../component/ImageGalery";
 import { Row, Col } from "react-bootstrap";
 import { useState, useRef } from "react";
-import { axiosx as axios } from "../../Helper";
+import { axiosx } from "../../Helper";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import Navbars from "../../component/Navbars";
 import Footer from "../../component/Footer";
 import { useParams } from "react-router-dom";
-import province from "./../../Province/data.json";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSnackbar } from "notistack";
 import ModalReact from "../../component/Modal";
 import {
-  faTruck,
   faCirclePlus,
   faCircleCheck,
   faCircleMinus,
   faCartPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect } from "react";
+import Spinner from "../../component/Spinner";
 export default function DetailProduct() {
+  const navigate = useNavigate();
   const inputRef = useRef(null);
   const { enqueueSnackbar } = useSnackbar();
   const [comment, setComment] = useState("");
   const [commentList, setCommentList] = useState([]);
   const [products, setProducts] = useState([]);
-  let provinces = Object.values(province);
-  let [amount, setAmount] = useState(1);
-  const [data, setData] = useState({});
+  const [amount, setAmount] = useState(1);
+  const [data, setData] = useState();
   const [image, setImage] = useState([]);
   const [totalComment, setTotalComment] = useState(0);
-  const [isReply, setIsReply] = useState(false);
-  let { id } = useParams();
   const [show, setShow] = useState(false);
+  const [imgComment, setImgComment] = useState([]);
+  const [userInfo, setUserInfo] = useState()
+  let { id } = useParams();
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setShow(true);
   };
+  console.log(data);
   let user = JSON.parse(localStorage.getItem("token"));
+  const handleChangeImage = (e) => {
+    setImage([...e.target.files]);
+    const selectedFiles = e.target.files;
+    const selectedFilesArr = Array.from(selectedFiles);
+    const imagesArr = selectedFilesArr.map((item) => URL.createObjectURL(item));
+    console.log(imagesArr)
+    setImgComment(imagesArr);
+  };
+  const handleDeleteImage = (item, idex) =>{
+    setImage(image.filter((image, index) => index !== idex))
+    setImgComment(imgComment.filter(e=> e!==item))
+
+  }
+  console.log(imgComment);
   console.log(image);
+  // comment
+  console.log(userInfo)
   const submit = (e) => {
     e.preventDefault();
+    if (comment.length === 0) {
+      enqueueSnackbar("Bình luận không thể để trống", { variant: "error" });
+      return;
+    }
     let formData = new FormData();
     formData.append("commentContent", comment);
     if (image && image.length > 0) {
@@ -51,7 +74,7 @@ export default function DetailProduct() {
       formData.append("files", new File([""], ""));
     }
 
-    axios
+    axiosx
       .post(
         `/comment/insertCommentAndMulFile?idUser=${user.id}&idProduct=${id}`,
         formData,
@@ -64,7 +87,10 @@ export default function DetailProduct() {
       .then(() => {
         enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
         setTotalComment(totalComment + 1);
+        document.getElementById("submitComment").reset();
+        setComment("");
         setImage(new File([""], ""));
+        setImgComment([]);
       })
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
@@ -75,7 +101,7 @@ export default function DetailProduct() {
       });
       return;
     }
-    axios
+    axiosx
       .post(`/cart/insert?idUser=${user.id}&idProduct=${id}`, {
         amount: amount,
       })
@@ -85,29 +111,49 @@ export default function DetailProduct() {
       })
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
-  useEffect(() => {
-    if (axios) {
-      axios
-        .get(`/product/selectAll`)
-        .then((res) => {
-          console.log(res.data.filter((item) => item.idProduct === Number(id))[0]);
-          setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
-          setProducts(res.data);
-        })
-        .catch((err) => console.log(err));
 
-      axios
-        .get(`/comment/selectById/${id}`)
-        .then((res) => {
-          console.log(res.data);
-          setCommentList(res.data);
-          setTotalComment(res.data.length);
+  const deleteComment = (id) => {
+    axiosx
+      .delete(`/comment/delete/${id}`)
+      .then(() => {
+        enqueueSnackbar("Đã xóa bình luận", { variant: "success" });
+        setCommentList(commentList.filter((item) => item.idComment !== id));
+      })
+      .catch(() => enqueueSnackbar("Đã xảy ra lỗi", { variant: "error" }));
+  };
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/product/selectAll`)
+      .then((res) => {
+        setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
+        let userId = res.data.filter((item) => item.idProduct === Number(id))[0].idUser       
+         axiosx.get(`/user/selectById/${userId}`)
+        .then(res=> {
+          setUserInfo(res.data)
+          console.log(res.data)
         })
-        .catch((err) => console.log(err));
-    }
+        .catch(err=>console.log(err))
+
+        setProducts(res.data);
+      })
+      .catch((err) => console.log(err));
+    axios
+      .get(`http://localhost:8080/comment/selectById/${id}`)
+      .then((res) => {
+        setCommentList([...res.data].reverse());
+        setTotalComment(res.data.length);
+      })
+      .catch((err) => console.log(err));
+
   }, [totalComment]);
+  // console.log(userInfo)
   const order = () => {
-    console.log(data);
+    if (amount > data.amount) {
+      enqueueSnackbar("Số lượng sản phẩm còn lại không đủ", {
+        variant: "error",
+      });
+      return;
+    }
     let _data = { ...data };
     delete _data.product;
     _data.totalPrice = amount * data.price;
@@ -115,13 +161,13 @@ export default function DetailProduct() {
     _data.createDate = `${date.getFullYear()}-${
       date.getMonth() + 1
     }-${date.getDate()}`;
-    _data.amount = amount
-    console.log(_data);
-    axios
+    _data.amount = amount;
+    axiosx
       .post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
       .then(() => {
-        enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" })
-        // navigate('/')
+        handleClose();
+        enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" });
+        navigate("/user/await");
       })
       .catch(() =>
         enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
@@ -132,367 +178,377 @@ export default function DetailProduct() {
       <div className="bg-main">
         <ModalReact
           show={show}
+          title="Đặt sản phẩm"
           handleClose={handleClose}
-          handleFunction={addToCart}
+          handleFunction={order}
           handleShow={handleShow}
         >
-          Bạn muốn thêm sản phẩm này vào giỏ hàng?
+          Bạn muốn đặt sản phẩm này?
         </ModalReact>
         <Navbars />
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
-          <Row>
-            <Col md={6}>
-              <ImageGallery images={data && data.urlFile ? data.urlFile : []} />
-            </Col>
-            <Col md={6}>
-              <h2 className="mb-4">{data.productName}</h2>
-              <h3 className="mb-4">Giá:{data && data.price}</h3>
-              <div className="d-flex mb-5">
+          {data ? (
+            <Row>
+              <Col md={6}>
+                <ImageGallery images={data.urlFile ? data.urlFile : []} />
+              </Col>
+              <Col md={6}>
+                <h2 className="mb-4">{data.productName}</h2>
+                <h3 className="mb-4">
+                  Giá:
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(data.price)}
+                </h3>
+                <div className="mb-4 d-flex">
+                  <div className="me-5">Số lượng</div>
+                  <div>
+                    <FontAwesomeIcon
+                      icon={faCircleMinus}
+                      role="button"
+                      onClick={() => setAmount(amount - 1)}
+                    />
+                    <input
+                      type="number"
+                      value={amount}
+                      className="w-25 text-center"
+                    />
+                    <FontAwesomeIcon
+                      icon={faCirclePlus}
+                      role="button"
+                      onClick={() => setAmount(amount + 1)}
+                    />
+                  </div>
+                  <div className="form-text">
+                    {data.amount > 0 ? data.amount : 0} Số lượng có sẵn
+                  </div>
+                </div>
+                {user && user.roles[0] === "ROLE_MODERATOR" ? (
+                  <Link to="/sign-in">
+                    <span className="btn btn-success" role="button">
+                      Sửa sản phẩm
+                    </span>
+                  </Link>
+                ) : (
+                  <div
+                    className={`mt-4 ${
+                      user.roles[0] === "ROLE_USER" ? "d-block" : "d-none"
+                    }`}
+                  >
+                    <button
+                      className="btn bg-spotlight me-3"
+                      onClick={addToCart}
+                    >
+                      <FontAwesomeIcon icon={faCartPlus} className="me-2" />
+                      Thêm vào giỏ hàng
+                    </button>
+                    <button
+                      onClick={handleShow}
+                      className="btn btn-buy text-white"
+                    >
+                      Mua ngay
+                    </button>
+                  </div>
+                )}
+              </Col>
+            </Row>
+          ) : (
+            <Spinner />
+          )}
+        </div>
+        {userInfo && (
+          <div className="container d-flex align-items-center bg-spotlight shadow-sm p-3 rounded-3 mt-3 text-start">
+            <div className="col-4">
+              <div className="d-flex justify-content-start align-items-center border-right border-danger">
                 <div className="me-3">
-                  <FontAwesomeIcon icon={faTruck} className="me-2" />
-                  Vận chuyển tới
-                </div>
-                <div class="form-floating mb-3 w-100">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="address"
-                    placeholder="name@example.com"
+                  <img
+                    className="rounded-pill"
+                    src={
+                        userInfo.urlImageSet[0]}
+                    width="80px"
+                    height="80px"
                   />
-                  <label for="address">Nhập nơi nhận...</label>
                 </div>
-                {/* <select class="form-select" aria-label="Default select example">
-                  <option selected>-- Nơi nhận --</option>
-                  {provinces.map((item, index) => (
-                    <option key={index} value={index}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select> */}
-              </div>
-              <div className="mb-4 d-flex">
-                <div className="me-5">Số lượng</div>
                 <div>
-                  <FontAwesomeIcon
-                    icon={faCircleMinus}
-                    role="button"
-                    onClick={() => setAmount(amount - 1)}
-                  />
-                  <input
-                    type="number"
-                    value={amount}
-                    className="w-25 text-center"
-                  />
-                  <FontAwesomeIcon
-                    icon={faCirclePlus}
-                    role="button"
-                    onClick={() => setAmount(amount + 1)}
-                  />
+                  <div className="fw-bold fs-5">{userInfo.username}</div>
+                  <div>Người bán</div>
                 </div>
-                <div className="form-text">
-                  {data && data.amount > 0 ? data.amount : 0} Số lượng có sẵn
-                </div>
-              </div>
-              <div className="mt-4">
-                <button className="btn bg-spotlight me-3" onClick={handleShow}>
-                  <FontAwesomeIcon icon={faCartPlus} className="me-2" />
-                  Thêm vào giỏ hàng
-                </button>
-                <button onClick={order} className="btn btn-buy text-white">Mua ngay</button>
-              </div>
-            </Col>
-          </Row>
-        </div>
-        <div className="container d-flex align-items-center bg-spotlight shadow-sm p-3 rounded-3 mt-3 text-start">
-          <div className="col-4">
-            <div className="d-flex justify-content-start align-items-center border-right border-danger">
-              <div className="me-3">
-                <img
-                  className="rounded-pill"
-                  src={user.fileList[0].fileDownloadUri}
-                  width="80px"
-                />
-              </div>
-              <div>
-                <div>thiennhh</div>
-                <div>Người bán</div>
               </div>
             </div>
-          </div>
-          <div className="col-8 d-none d-sm-none d-md-none d-lg-block d-xl-block">
-            <div className="row">
-              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
-                <div>
-                  <span className="me-3">Email</span>
-                  <span className="text-main">{user.email}</span>
+            <div className="col-8 d-none d-sm-none d-md-none d-lg-block d-xl-block">
+              <div className="row">
+                <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
+                  <div>
+                    <span className="me-3 fw-bold">Email</span>
+                    <span className="text-main">{userInfo.email}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
-                <div>
-                  <span className="me-3">Tên</span>
-                  <span className="text-main">{user.name}</span>
+                <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
+                  <div>
+                    <span className="me-3 fw-bold">Tên</span>
+                    <span className="text-main">{userInfo.fullName}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
-                <div>
-                  <span className="me-3">SĐT</span>
-                  <span className="text-main">{user.phoneNumber}</span>
+                <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
+                  <div>
+                    <span className="me-3 fw-bold">SĐT</span>
+                    <span className="text-main">{userInfo.phoneNumber}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="container bg-white p-3 rounded-3 mt-3 mb-3 text-start">
           <div className="mt-4 ms-3">
             <h2 className="text-start mb-5">Mô tả sản phẩm</h2>
-            <div>
-              <div className="mb-5">
-                <div>{data.productName}</div>
-                <div className="mt-3">
-                  {data.description &&
-                    data.description
-                      .replace(/-/g, "")
-                      .replace(/\r/g, "")
-                      .split("\n")
-                      .filter((item) => item !== "")
-                      .map((item) => (
-                        <div className="mb-3">
-                          <FontAwesomeIcon
-                            icon={faCircleCheck}
-                            className="me-2 text-success"
-                          />
-                          {item}
-                        </div>
-                      ))}
-                </div>
-              </div>
+            {data ? (
               <div>
+                <div className="mb-5">
+                  <div className="fs-4 fw-bold">{data.productName}</div>
+                  <div className="mt-3">
+                    {data.description &&
+                      data.description
+                        .replace(/-/g, "")
+                        .replace(/\r/g, "")
+                        .split("\n")
+                        .filter((item) => item !== "")
+                        .map((item) => (
+                          <div className="mb-3">
+                            <FontAwesomeIcon
+                              icon={faCircleCheck}
+                              className="me-2 text-success"
+                            />
+                            {item}
+                          </div>
+                        ))}
+                  </div>
+                </div>
                 <div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Cam kết chất lượng và mẫu mã sản phẩm giống với hình ảnh.
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Hoàn tiền nếu sản phẩm không giống với mô tả.{" "}
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Cam kết được đổi trả hàng trong vòng 7 ngày.{" "}
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Chấp nhận đổi hàng khi size không vừa Giao hàng trên toàn
-                    quốc,{" "}
-                  </div>
-                  <div className="mb-3">
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="me-2 text-success"
-                    />
-                    Nhận hàng trả tiền Hỗ trợ đổi trả theo quy định của hệ
-                    thống.
+                  <div>
+                    <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      Cam kết chất lượng và mẫu mã sản phẩm giống với hình ảnh.
+                    </div>
+                    <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      Hoàn tiền nếu sản phẩm không giống với mô tả.{" "}
+                    </div>
+                    <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      Cam kết được đổi trả hàng trong vòng 7 ngày.{" "}
+                    </div>
+                    <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      Chấp nhận đổi hàng khi size không vừa Giao hàng trên toàn
+                      quốc,{" "}
+                    </div>
+                    <div className="mb-3">
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className="me-2 text-success"
+                      />
+                      Nhận hàng trả tiền Hỗ trợ đổi trả theo quy định của hệ
+                      thống.
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <Spinner />
+            )}
           </div>
         </div>
         <div className="container bg-white p-3 rounded-3 mt-3 mb-3 text-start">
           <div className="mt-4 ms-3">
             <h2>Đánh giá sản phẩm</h2>
-            <div className="d-flex">
-              <div className="me-3">
-                <img
-                  className="avt"
-                  src={user.fileList[0].fileDownloadUri}
-                />
-              </div>
-              <form
-                className="w-100"
-                encType="multipart/form-data"
-                onSubmit={(e) => submit(e)}
-              >
-                <div class="input-group mb-3">
-                  <input
-                    type="text"
-                    onChange={(e) => setComment(e.target.value)}
-                    class="form-control"
-                    placeholder="Nhập đánh giá..."
-                    aria-describedby="button-addon2"
+            {user && (
+              <div className="d-flex">
+                <div className="me-3">
+                  <img
+                    className="avt"
+                    src={
+                      user.fileList[0]
+                        ? user.fileList[0].fileDownloadUri
+                        : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
+                    }
                   />
-                  <label className="btn btn-outline-success" htmlFor="files">
-                    <span>Thêm hình</span>
-                  </label>
                 </div>
-                <input
-                  ref={inputRef}
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  id="files"
-                  multiple
-                  type="file"
-                  onChange={(e) => {
-                    setImage(e.target.files);
-                  }}
-                />
-                <div>
-                  <button type="submit" className="btn btn-success rounded-1">
-                    Bình luận
-                  </button>
-                </div>
-              </form>
-            </div>
-            {commentList &&
-              commentList.length > 0 &&
-              commentList.map((item, index) => (
-                <div key={index} className="mt-5">
-                  <div className="d-flex">
-                    <div className="me-3">
-                      <img
-                        className="avt"
-                        src="https://danviet.mediacdn.vn/296231569849192448/2021/6/28/huakhai4-1624835323234-1624835323406100909784.jpg"
-                      />
-                    </div>
-                    <div>
-                      <div className="fw-bold">Hua Khai</div>
-                      <div className="form-text">
-                        2022-10-10 14:28 | Phân loại hàng:{" "}
-                        {data.category && data.category.categoryName}
+                <form
+                  className="w-50"
+                  encType="multipart/form-data"
+                  id="submitComment"
+                  onSubmit={(e) => submit(e)}
+                >
+                  <div class="input-group mb-3">
+                    <input
+                      type="text"
+                      onChange={(e) => setComment(e.target.value)}
+                      class="form-control"
+                      placeholder="Nhập đánh giá..."
+                      aria-describedby="button-addon2"
+                    />
+                    <label className="btn btn-outline-success" htmlFor="files">
+                      <span>Thêm hình</span>
+                    </label>
+                  </div>
+                  <input
+                    ref={inputRef}
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    id="files"
+                    multiple
+                    type="file"
+                    onChange={(e) => {
+                      // setImage(e.target.files);
+                      handleChangeImage(e);
+                    }}
+                  />
+                  <div className="d-flex gap-2 mb-3">
+                    {imgComment.length > 0 &&
+                      imgComment.map((item, index) => (
+                        <div className='w-25'>
+                          <img src={item} alt="" className="w-100 h-75" />
+                        <span className="btn btn-sm btn-danger" onClick={()=>handleDeleteImage(item, index)}>bỏ chọn</span>
+                        </div>
+                      ))}
+                  </div>
+                  <div>
+                    <button type="submit" className="btn btn-success rounded-1">
+                      Bình luận
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+            {commentList.length > 0 && (
+              <div className=" overflow-auto row" style={{ height: "500px" }}>
+                {commentList.map((item, index) => (
+                  <div key={index} className="mt-5">
+                    <div className="d-flex">
+                      <div className="me-3">
+                        <img
+                          className="avt"
+                          src={item.userDTO?.urlImageSet[0]}
+                        />
                       </div>
-                      <div className="w-50">
-                        <span>{item.comment}</span>
-                      </div>
-                      <div className="d-flex">
-                        {item.urlFile.map((item) => (
-                          <div style={{ width: "100px", height: "100px" }}>
-                            <img src={item} width="100%" height="100%" />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="d-flex">
-                        <a
-                          role="button"
-                          className="form-text me-3 text-decoration-none"
-                        >
-                          Thích
-                        </a>
-                        <a
-                          onClick={() => setIsReply(!isReply)}
-                          role="button"
-                          className="form-text text-decoration-none"
-                        >
-                          Phản hồi
-                        </a>
-                      </div>
-                      {isReply && (
-                        <form
-                          className="w-100"
-                          encType="multipart/form-data"
-                          onSubmit={(e) => submit(e)}
-                        >
-                          <div class="input-group mb-3">
-                            <input
-                              type="text"
-                              onChange={(e) => setComment(e.target.value)}
-                              class="form-control"
-                              placeholder="Nhập đánh giá..."
-                              aria-describedby="button-addon2"
-                            />
-                            <label
-                              className="btn btn-outline-success"
-                              htmlFor="files"
+                      <div>
+                        <div className="fw-bold">{item.userDTO?.username}</div>
+                        <div className="form-text">
+                          2022-10-10 14:28 | Phân loại hàng:{" "}
+                          {data && data.category && data.category.categoryName}
+                        </div>
+                        <div className="w-100">
+                          <span>{item.comment}</span>
+                        </div>
+                        <div className="d-flex">
+                          {item.urlFile.map((item) => (
+                            <div
+                              style={{ width: "100px", height: "100px" }}
+                              className="me-2"
                             >
-                              <span>Thêm hình</span>
-                            </label>
-                          </div>
-                          <input
-                            ref={inputRef}
-                            accept="image/*"
-                            style={{ display: "none" }}
-                            id="files"
-                            multiple
-                            type="file"
-                            onChange={(e) => {
-                              setImage(e.target.files);
-                            }}
-                          />
-                          <div>
-                            <button
-                              type="submit"
-                              className="btn btn-success rounded-1"
-                            >
-                              Bình luận
-                            </button>
-                          </div>
-                        </form>
-                      )}
+                              <img src={item} width="100%" height="100%" />
+                            </div>
+                          ))}
+                        </div>
+                        {user &&
+                          (user.id == item.idUser ||
+                            (data && user.id == data.idUser)) && (
+                            <div className="d-flex">
+                              <a
+                                onClick={() => deleteComment(item.idComment, item.comment)}
+                                role="button"
+                                className="form-text me-3 text-decoration-none"
+                              >
+                                Xóa
+                              </a>
+                              {/* <a
+                                onClick={() => editComment(item.idComment)}
+                                role="button"
+                                className="form-text me-3 text-decoration-none"
+                              >
+                                Sửa
+                              </a> */}
+                            </div>
+                          )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
           </div>
           <div>
-            <h2 className="mt-5">Các sản phẩm khác</h2>
+            <h2 className="mt-4 ms-3">Các sản phẩm khác</h2>
             <div>
               <div>
                 <div className="row mt-2 p-2">
-                  {products &&
-                    products.length > 0 &&
+                  {products && products.length > 0 ? (
                     products.map((item) => (
                       <div
                         key={item.idProduct}
                         className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3"
                       >
-                        <div className="bg-white border-main">
-                          <div className="">
-                            <img
-                              src={item?.urlFile[0]}
-                              style={{ width: "100%", height: "155px" }}
-                            />
-                          </div>
-                          <div className="px-3 text-center pb-2 mt-2 text-start">
-                            <div style={{ fontSize: "12px" }}>
-                              {item.productName}
+                        <a
+                          href={`/product/${item.idProduct}`}
+                          className="text-decoration-none text-black"
+                        >
+                          <div className="bg-white border-main">
+                            <div className="">
+                              <img
+                                src={item?.urlFile[0]}
+                                style={{ width: "100%", height: "155px" }}
+                              />
                             </div>
-                            {/* <div className="d-flex justify-content-between"> */}
-                            <div style={{ fontSize: "12px" }}>
-                              Giá:{" "}
-                              <span className="text-main text-xs">
-                                {item.price.toLocaleString()} VND
-                              </span>
-                            </div>
-                            <div
-                              className="form-text"
-                              style={{ fontSize: "12px" }}
-                            >
-                              <span
-                                className={
-                                  item.amount == 0 ? "text-danger" : ""
-                                }
+                            <div className="px-3 text-center pb-2 mt-2 text-start">
+                              <div style={{ fontSize: "12px" }}>
+                                {item.productName}
+                              </div>
+                              {/* <div className="d-flex justify-content-between"> */}
+                              <div style={{ fontSize: "12px" }}>
+                                Giá:{" "}
+                                <span className="text-main text-xs">
+                                  {item.price.toLocaleString()} VND
+                                </span>
+                              </div>
+                              <div
+                                className="form-text"
+                                style={{ fontSize: "12px" }}
                               >
-                                {item.amount > 0
-                                  ? `Còn lại: ${item.amount}`
-                                  : "Hết Hàng"}
-                              </span>
+                                <span
+                                  className={
+                                    item.amount == 0 ? "text-danger" : ""
+                                  }
+                                >
+                                  {item.amount > 0
+                                    ? `Còn lại: ${item.amount}`
+                                    : "Hết Hàng"}
+                                </span>
+                              </div>
+                              {/* </div> */}
                             </div>
-                            {/* </div> */}
                           </div>
-                        </div>
+                        </a>
                       </div>
-                    ))}
+                    ))
+                  ) : (
+                    <div className="spinner-border text-danger" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
