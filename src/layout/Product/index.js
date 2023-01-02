@@ -33,6 +33,8 @@ export default function ProductPage() {
 
   console.log(isLoading);
   let { enqueueSnackbar } = useSnackbar();
+
+  //useEffect
   useEffect(() => {
     setIsLoading(true);
     axios
@@ -53,9 +55,13 @@ export default function ProductPage() {
       .catch((err) => console.log(err));
     setIsLoading(false);
   }, [data]);
+
+  //get all product when click all product
   const productAll = () => {
     setData(productList);
   };
+
+  //select category to filter product
   const selectCategory = (id) => {
     console.log(id)
     setIsLoading(true);
@@ -67,6 +73,7 @@ export default function ProductPage() {
     setIsLoading(false);
   };
 
+  // search product
   const searchProduct = () => {
     axiosx
       .get(
@@ -87,6 +94,7 @@ export default function ProductPage() {
         <h1 className="text-uppercase me-5 mb-5 sticky-top border-underline w-100 py-3 bg-white">
           Sản phẩm
         </h1>
+        {/* Load category list */}
         {productList.length > 0 && category.length > 0 ? (
           <div>
             <div className="row text-center">
@@ -131,11 +139,11 @@ export default function ProductPage() {
                 </div>
               </Col>
             </Row>
+
+            {/* Load product */}
             <Row>
               {isLoading ? (
-                <div className="spinner-border text-danger" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
+                <Spinner/>
               ) : productCategory.length > 0 ? (
                 <div className=" overflow-auto row"  style={{height: '500px'}}>
                   {productCategory.map(
@@ -161,6 +169,7 @@ export default function ProductPage() {
                                       gutterBottom
                                       variant="h5"
                                       component="div"
+                                      className="limit-text"
                                     >
                                       {product.productName}
                                     </Typography>

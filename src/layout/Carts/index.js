@@ -23,9 +23,9 @@ export default function Carts() {
   const [wardName, setWardName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [newamount, setNewAmount] = useState(0);
-  console.log(data);
+  const [ids, setIds] = useState(0);
   const handleClose = () => setShow(false);
-  const handleShow = () => {
+  const handleShow = (id) => {
     setShow(true);
   };
   let user = JSON.parse(localStorage.getItem("token"));
@@ -35,6 +35,8 @@ export default function Carts() {
         .get(`/cart/findById/${user.id}`)
         .then((res) => {
           setData(res.data);
+          console.log(res.data)
+          setIds(res.data.map(item=> item.product.idProduct))
           setIsLoading(false);
         })
         .catch((error) => console.log(error));
@@ -53,27 +55,33 @@ export default function Carts() {
   const handleDelete = (id) => {
     axios
       .delete(`/cart/delete/${id}`)
-      .then((res) => setData(data.filter((item) => item.idCart !== id)));
+      .then((res) => {
+        setData(data.filter((item) => item.idCart !== id))
+        setIds(data.filter((item) => item.idCart !== id).map(e=> e.product.idProduct))
+      });
   };
-  const order = (id) => {
-    console.log(data);
-    let _data = { ...data };
-    delete _data.product;
-    _data.totalPrice = data[0].amount * data[0].product.price;
+  const order = () => {
+    if(address.length === 0 || wardName.length === 0 || districtName.length === 0 ){
+     enqueueSnackbar('Vui lòng nhập địa chỉ giao hàng', {variant: 'error'})
+     return
+    }
     let date = new Date();
-    _data.createDate = `${date.getFullYear()}-${
-      date.getMonth() + 1
-    }-${date.getDate()}`;
-    _data.amount = data[0].amount;
-    console.log(_data);
+    let _data = {
+      totalPrice : data[0].amount * data[0].product.price,
+      createDate : `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+      amount : data[0].amount,
+      address: document.getElementById('address').innerText,
+      idProducts : ids
+    }
     axios
-      .post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
+      .post(`/bill/save?idUser=${user.id}`, _data)
       .then(() => {
         enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" });
-        // navigate('/')
       })
-      .catch(() =>
-        enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
+      .catch((err) =>{
+        console.log(err)
+          enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
+      }
       );
   };
 
@@ -112,6 +120,7 @@ export default function Carts() {
             handleFunction={order}
             handleShow={handleShow}
           >
+            <form>
             <div className="d-flex mb-2">
               <div className="me-3">
                 <FontAwesomeIcon icon={faTruck} className="me-2" />
@@ -121,9 +130,10 @@ export default function Carts() {
                 <div className="col-12 col-sm-12 col-md-12 cl-lg-4 col-xl-4">
                   <select
                     class="form-select"
+                    required
                     onChange={(e) => handleDistrict(e.target.value)}
                   >
-                    <option selected>-- Chọn Quận/huyện --</option>
+                    <option>-- Chọn Quận/huyện --</option>
                     {district.map((item, index) => (
                       <option key={index} value={item.code}>
                         {item.name}
@@ -134,9 +144,10 @@ export default function Carts() {
                 <div className="col-12 col-sm-12 col-md-12 cl-lg-4 col-xl-4">
                   <select
                     class="form-select"
+                    required
                     onChange={(e) => setWardName(e.target.value + ", ")}
                   >
-                    <option selected>-- Chọn Xã/Phường --</option>
+                    <option>-- Chọn Xã/Phường --</option>
                     {ward.length > 0 &&
                       ward.map((item, index) => (
                         <option key={index} value={item}>
@@ -153,6 +164,7 @@ export default function Carts() {
             <div class="form-floating mb-3">
               <input
                 type="text"
+                required
                 className="form-control"
                 onChange={(e) => setAddress(e.target.value + ", ")}
                 id="delivery"
@@ -160,9 +172,10 @@ export default function Carts() {
               />
               <label for="delivery">Nhập nơi nhận...</label>
             </div>
-            <div className="mb-2 fw-bold">
+            <div className="mb-2 fw-bold" id="address">
               {address + wardName + districtName + " Đà Nẵng"}
             </div>
+            </form>
           </ModalReact>
           <Navbars />
           <div className="container mt-5 mb-5 position-relative bg-white p-3 rounded-3">

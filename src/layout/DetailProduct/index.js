@@ -32,7 +32,10 @@ export default function DetailProduct() {
   const [totalComment, setTotalComment] = useState(0);
   const [show, setShow] = useState(false);
   const [imgComment, setImgComment] = useState([]);
-  const [userInfo, setUserInfo] = useState()
+  const [sellerInfo, setSellerInfo] = useState();
+  const [commentEdit, setCommentEdit] = useState();
+  const [isEdit, setIsEdit] = useState(false);
+  const [idComment, setIdComment] = useState()
   let { id } = useParams();
   const handleClose = () => setShow(false);
   const handleShow = () => {
@@ -40,60 +43,124 @@ export default function DetailProduct() {
   };
   console.log(data);
   let user = JSON.parse(localStorage.getItem("token"));
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const handleChangeImage = (e) => {
     setImage([...e.target.files]);
     const selectedFiles = e.target.files;
     const selectedFilesArr = Array.from(selectedFiles);
     const imagesArr = selectedFilesArr.map((item) => URL.createObjectURL(item));
-    console.log(imagesArr)
+    console.log(imagesArr);
     setImgComment(imagesArr);
   };
-  const handleDeleteImage = (item, idex) =>{
-    setImage(image.filter((image, index) => index !== idex))
-    setImgComment(imgComment.filter(e=> e!==item))
-
-  }
+  const handleDeleteImage = (item, idex) => {
+    setImage(image.filter((image, index) => index !== idex));
+    setImgComment(imgComment.filter((e) => e !== item));
+  };
   console.log(imgComment);
   console.log(image);
+  let avatar;
+  if (userInfo) {
+    avatar = userInfo.urlImageSet[0];
+  } else if (user) {
+    console.log(user);
+    avatar = user.fileList[0].fileDownloadUri;
+  }
+  // handle Comment
+  const handleComment = (e) => {
+    if (isEdit) {
+      let newData = { ...commentEdit };
+      console.log(newData);
+      newData[e.target.id] = e.target.value;
+      console.log("isEdit");
+      setCommentEdit(newData);
+      console.log(newData);
+    } else {
+      console.log("noEdit");
+      setComment(e.target.value);
+    }
+  };
   // comment
-  console.log(userInfo)
   const submit = (e) => {
     e.preventDefault();
-    if (comment.length === 0) {
-      enqueueSnackbar("Bình luận không thể để trống", { variant: "error" });
-      return;
-    }
-    let formData = new FormData();
-    formData.append("commentContent", comment);
-    if (image && image.length > 0) {
-      for (let i = 0; i < image.length; i++) {
-        console.log(image[i]);
-        formData.append("files", image[i]);
+    if (isEdit) {
+      let formData = new FormData();
+      formData.append("commentContent", commentEdit.comment);
+      if (image && image.length > 0) {
+        for (let i = 0; i < image.length; i++) {
+          console.log(image[i]);
+          formData.append("files", image[i]);
+        }
+      } else {
+        formData.append("files", new File([""], ""));
       }
-    } else {
-      formData.append("files", new File([""], ""));
-    }
-
-    axiosx
-      .post(
-        `/comment/insertCommentAndMulFile?idUser=${user.id}&idProduct=${id}`,
-        formData,
-        {
+      axiosx
+        .put(`/comment/update/${idComment}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+        })
+        .then(() => {
+          enqueueSnackbar("Bình luận đã được chỉnh sửa", {
+            variant: "success",
+          });
+          setTotalComment(totalComment + 1);
+          document.getElementById("submitComment").reset();
+          setComment("");
+          setImage(new File([""], ""));
+          setImgComment([]);
+        })
+        .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
+    } else {
+      if (comment.length === 0) {
+        enqueueSnackbar("Bình luận không thể để trống", { variant: "error" });
+        return;
+      }
+      let formData = new FormData();
+      formData.append("commentContent", comment);
+      if (image && image.length > 0) {
+        for (let i = 0; i < image.length; i++) {
+          console.log(image[i]);
+          formData.append("files", image[i]);
         }
-      )
-      .then(() => {
-        enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
-        setTotalComment(totalComment + 1);
-        document.getElementById("submitComment").reset();
-        setComment("");
-        setImage(new File([""], ""));
-        setImgComment([]);
-      })
-      .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
+      } else {
+        formData.append("files", new File([""], ""));
+      }
+
+      axiosx
+        .post(
+          `/comment/insertCommentAndMulFile?idUser=${user.id}&idProduct=${id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then(() => {
+          enqueueSnackbar("Đã thêm bình luận", { variant: "success" });
+          setTotalComment(totalComment + 1);
+          document.getElementById("submitComment").reset();
+          setComment("");
+          setImage(new File([""], ""));
+          setImgComment([]);
+        })
+        .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
+    }
   };
+
+  // get comment
+  const getComment = (id) => {
+    axiosx
+      .get(`/comment/selectByIdComment/${id}`)
+      .then((res) => {
+        setCommentEdit(res.data);
+        setIdComment(id)
+        setIsEdit(true);
+      })
+      .catch((err) => console.log(err));
+    // setCommentEdit
+  };
+  //add to cart
   const addToCart = () => {
     if (amount > data.amount) {
       enqueueSnackbar("Số lượng sản phẩm còn lại không đủ", {
@@ -112,6 +179,7 @@ export default function DetailProduct() {
       .catch((err) => enqueueSnackbar("Lỗi", { variant: "error" }));
   };
 
+  //delete comment
   const deleteComment = (id) => {
     axiosx
       .delete(`/comment/delete/${id}`)
@@ -121,18 +189,22 @@ export default function DetailProduct() {
       })
       .catch(() => enqueueSnackbar("Đã xảy ra lỗi", { variant: "error" }));
   };
+
+  //useEffect
   useEffect(() => {
     axios
       .get(`http://localhost:8080/product/selectAll`)
       .then((res) => {
         setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
-        let userId = res.data.filter((item) => item.idProduct === Number(id))[0].idUser       
-         axiosx.get(`/user/selectById/${userId}`)
-        .then(res=> {
-          setUserInfo(res.data)
-          console.log(res.data)
-        })
-        .catch(err=>console.log(err))
+        let userId = res.data.filter((item) => item.idProduct === Number(id))[0]
+          .idUser;
+        axiosx
+          .get(`/user/selectById/${userId}`)
+          .then((res) => {
+            setSellerInfo(res.data);
+            console.log(res.data);
+          })
+          .catch((err) => console.log(err));
 
         setProducts(res.data);
       })
@@ -144,9 +216,9 @@ export default function DetailProduct() {
         setTotalComment(res.data.length);
       })
       .catch((err) => console.log(err));
-
   }, [totalComment]);
-  // console.log(userInfo)
+
+  //order
   const order = () => {
     if (amount > data.amount) {
       enqueueSnackbar("Số lượng sản phẩm còn lại không đủ", {
@@ -173,9 +245,44 @@ export default function DetailProduct() {
         enqueueSnackbar("Đặt đơn hàng thất bại", { variant: "error" })
       );
   };
+
+  // convert image to file object
+  // const toDataURL = (url) =>
+  //   fetch(url)
+  //     .then((response) => response.blob())
+  //     .then(
+  //       (blob) =>
+  //         new Promise((resolve, reject) => {
+  //           const reader = new FileReader();
+  //           reader.onloadend = () => resolve(reader.result);
+  //           reader.onerror = reject;
+  //           reader.readAsDataURL(blob);
+  //         })
+  //     );
+
+  // const dataURLtoFile = (dataurl, filename) => {
+  //   var arr = dataurl.split(","),
+  //     mime = arr[0].match(/:(.*?);/)[1],
+  //     bstr = atob(arr[1]),
+  //     n = bstr.length,
+  //     u8arr = new Uint8Array(n);
+  //   while (n--) {
+  //     u8arr[n] = bstr.charCodeAt(n);
+  //   }
+  //   return new File([u8arr], filename, { type: mime });
+  // };
+
+  // toDataURL(url)
+  // .then(dataUrl => {
+  //    console.log('Here is Base64 Url', dataUrl)
+  //    var fileData = dataURLtoFile(dataUrl, "imageName.jpg");
+  //    console.log("Here is JavaScript File Object",fileData)
+  //    fileArr.push(fileData)
+  //  })
   return (
     <div>
       <div className="bg-main">
+        {/* Modal React */}
         <ModalReact
           show={show}
           title="Đặt sản phẩm"
@@ -186,6 +293,7 @@ export default function DetailProduct() {
           Bạn muốn đặt sản phẩm này?
         </ModalReact>
         <Navbars />
+
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
           {data ? (
             <Row>
@@ -257,21 +365,21 @@ export default function DetailProduct() {
             <Spinner />
           )}
         </div>
-        {userInfo && (
+        {/* seller Info */}
+        {sellerInfo && (
           <div className="container d-flex align-items-center bg-spotlight shadow-sm p-3 rounded-3 mt-3 text-start">
             <div className="col-4">
               <div className="d-flex justify-content-start align-items-center border-right border-danger">
                 <div className="me-3">
                   <img
                     className="rounded-pill"
-                    src={
-                        userInfo.urlImageSet[0]}
+                    src={sellerInfo.urlImageSet[0]}
                     width="80px"
                     height="80px"
                   />
                 </div>
                 <div>
-                  <div className="fw-bold fs-5">{userInfo.username}</div>
+                  <div className="fw-bold fs-5">{sellerInfo.username}</div>
                   <div>Người bán</div>
                 </div>
               </div>
@@ -281,25 +389,27 @@ export default function DetailProduct() {
                 <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                   <div>
                     <span className="me-3 fw-bold">Email</span>
-                    <span className="text-main">{userInfo.email}</span>
+                    <span className="text-main">{sellerInfo.email}</span>
                   </div>
                 </div>
                 <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                   <div>
                     <span className="me-3 fw-bold">Tên</span>
-                    <span className="text-main">{userInfo.fullName}</span>
+                    <span className="text-main">{sellerInfo.fullName}</span>
                   </div>
                 </div>
                 <div className="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 mb-3">
                   <div>
                     <span className="me-3 fw-bold">SĐT</span>
-                    <span className="text-main">{userInfo.phoneNumber}</span>
+                    <span className="text-main">{sellerInfo.phoneNumber}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* product description */}
         <div className="container bg-white p-3 rounded-3 mt-3 mb-3 text-start">
           <div className="mt-4 ms-3">
             <h2 className="text-start mb-5">Mô tả sản phẩm</h2>
@@ -372,20 +482,15 @@ export default function DetailProduct() {
             )}
           </div>
         </div>
+
+        {/* comment product */}
         <div className="container bg-white p-3 rounded-3 mt-3 mb-3 text-start">
           <div className="mt-4 ms-3">
             <h2>Đánh giá sản phẩm</h2>
             {user && (
               <div className="d-flex">
                 <div className="me-3">
-                  <img
-                    className="avt"
-                    src={
-                      user.fileList[0]
-                        ? user.fileList[0].fileDownloadUri
-                        : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
-                    }
-                  />
+                  <img className="avt" src={avatar} />
                 </div>
                 <form
                   className="w-50"
@@ -396,7 +501,9 @@ export default function DetailProduct() {
                   <div class="input-group mb-3">
                     <input
                       type="text"
-                      onChange={(e) => setComment(e.target.value)}
+                      onChange={(e) => handleComment(e)}
+                      value={commentEdit ? commentEdit.comment : comment}
+                      id="comment"
                       class="form-control"
                       placeholder="Nhập đánh giá..."
                       aria-describedby="button-addon2"
@@ -420,9 +527,14 @@ export default function DetailProduct() {
                   <div className="d-flex gap-2 mb-3">
                     {imgComment.length > 0 &&
                       imgComment.map((item, index) => (
-                        <div className='w-25'>
+                        <div className="w-25">
                           <img src={item} alt="" className="w-100 h-75" />
-                        <span className="btn btn-sm btn-danger" onClick={()=>handleDeleteImage(item, index)}>bỏ chọn</span>
+                          <span
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteImage(item, index)}
+                          >
+                            bỏ chọn
+                          </span>
                         </div>
                       ))}
                   </div>
@@ -464,26 +576,34 @@ export default function DetailProduct() {
                             </div>
                           ))}
                         </div>
-                        {user &&
-                          (user.id == item.idUser ||
-                            (data && user.id == data.idUser)) && (
+                        <div className="d-flex gap-3">
+                          {user &&
+                            (user.id == item.idUser ||
+                              (data && user.id == data.idUser)) && (
+                              <div className="d-flex">
+                                <a
+                                  onClick={() =>
+                                    deleteComment(item.idComment, item.comment)
+                                  }
+                                  role="button"
+                                  className="form-text me-3 text-decoration-none"
+                                >
+                                  Xóa
+                                </a>
+                              </div>
+                            )}
+                          {user && user.id == item.idUser && (
                             <div className="d-flex">
                               <a
-                                onClick={() => deleteComment(item.idComment, item.comment)}
-                                role="button"
-                                className="form-text me-3 text-decoration-none"
-                              >
-                                Xóa
-                              </a>
-                              {/* <a
-                                onClick={() => editComment(item.idComment)}
+                                onClick={() => getComment(item.idComment)}
                                 role="button"
                                 className="form-text me-3 text-decoration-none"
                               >
                                 Sửa
-                              </a> */}
+                              </a>
                             </div>
                           )}
+                        </div>
                       </div>
                     </div>
                   </div>

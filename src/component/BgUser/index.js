@@ -65,6 +65,7 @@ const sellerMenu = [
     link: "/",
     icon: faRightFromBracket,
     logout: function () {
+      localStorage.clear();
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
@@ -122,9 +123,9 @@ export default function BgUser({ children }) {
         show={show}
         title="Đổi mật khẩu"
       ></ModalReact> */}
-      <div className="row">
+      <div className="row m-0">
         <div
-          className="col-2 col-sm-2 col-md-2 col-lg-3 col-xl-3 mt-3 bg-white sticky-top rounded-2 mb-3 ms-4 shadow-sm"
+          className="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 mt-3 bg-white sticky-top rounded-2 mb-3 shadow-sm"
           style={{ height: "100vh" }}
         >
           <div className="w-100 ">
@@ -185,9 +186,8 @@ export default function BgUser({ children }) {
             </div>
           </div>
         </div>
-        <div className="col-8 mt-3 p-0">
-          <MDBContainer className="ms-2">
-            <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex justify-content-between bg-white p-3 rounded-3 mb-3 shadow-sm  sticky-top">
+        <div className="col-10 mt-3 ps-3">
+            <div className="d-none d-sm-none d-md-none d-lg-flex d-xl-flex justify-content-between p-3 bg-white rounded-3 mb-3 shadow-sm  sticky-top">
               <div>
                 {user.roles[0] === "ROLE_MODERATOR" &&
                 <Link to="/product/add">
@@ -214,7 +214,6 @@ export default function BgUser({ children }) {
               </button>
             </div>
             <div className="mb-3 shadow-sm">{children}</div>
-          </MDBContainer>
         </div>
       </div>
     </div>

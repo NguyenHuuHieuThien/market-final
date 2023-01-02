@@ -33,10 +33,10 @@ export default function AddproductPage() {
         .catch((err) => console.log(err));
       if (id) {
         axios
-          .get(`/product/selectByMulId/?mulId=${id}`)
+          .get(`/product/selectById/${id}`)
           .then((res) => {
             console.log(res.data);
-            setDataUpdate(res.data[0]);
+            setDataUpdate(res.data);
           })
           .catch((err) => console.log(err));
       }
@@ -63,7 +63,22 @@ export default function AddproductPage() {
   const submit = (e) => {
     e.preventDefault();
     if (id) {
-      axios.put(`/product/update/${id}`, dataUpdate).then((res) => {
+      let formData = new FormData();
+      formData.append("productName", dataUpdate.productName);
+      formData.append("price", dataUpdate.price);
+      formData.append("status", dataUpdate.status);
+      formData.append("description", dataUpdate.description);
+      formData.append("tradePark", dataUpdate.tradePark);
+      formData.append("amount", dataUpdate.amount);
+      if (dataUpdate && dataUpdate.files.length > 0) {
+        for (let i = 0; i < dataUpdate.files.length; i++) {
+          formData.append("files", dataUpdate.files[i]);
+        }
+      }
+      axios.put(`/product/update/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }, }).then((res) => {
         enqueueSnackbar("Sửa thành công", { variant: "success" });
       });
     } else {
@@ -104,7 +119,7 @@ export default function AddproductPage() {
           <form onSubmit={(e) => submit(e)}>
             <div className="ms-3 me-3 py-3 text-start">
               <h1 className="mb-5">Đăng Sản phẩm</h1>
-              {id ? (
+              {id && dataUpdate ? (
                 <div>
                   <div className="row">
                     <div className="col-12 co-sm-12 col-md-12 col-lg-6 col-xl-6 text-black">
@@ -148,7 +163,7 @@ export default function AddproductPage() {
                           onChange={(e) => handle(e)}
                           required
                           type="text"
-                          value={dataUpdate.amount}
+                          value={dataUpdate && dataUpdate.amount}
                           placeholder="Nhập số lượng..."
                           class="form-control"
                           id="amount"
@@ -161,7 +176,7 @@ export default function AddproductPage() {
                         <select
                           disabled
                           class="form-select"
-                          value={dataUpdate.idCategory}
+                          value={dataUpdate && dataUpdate.idCategory}
                           onChange={(e) =>
                             setIdCategory(Number(e.target.value))
                           }

@@ -108,7 +108,7 @@ export default function Navbars() {
     {
       name: "Sản phẩm đã đăng bán",
       icon: faClipboardList,
-      link: "/user/posted",
+      link: "/sell/list",
     },
     {
       name: "Đăng xuất",
@@ -124,49 +124,69 @@ export default function Navbars() {
   const [data, setData] = useState([]);
   const [notireaded, setNotiReaded] = useState([]);
   const [notinumber, setNotiNumber] = useState(0);
+  const [visibleNoti, setVisibleNoti] = useState(false);
+  const [visibleUser, setVisibleUser] = useState(false);
+  const showNoti = () => setVisibleNoti(true);
+  const hideNoti = () => setVisibleNoti(false);
+  const showUser = () => setVisibleUser(true);
+  const hideUser = () => setVisibleUser(false);
   const [bg, setBg] = useState("bg-spotlight");
   let navigate = useNavigate();
   let user = JSON.parse(localStorage.getItem("token"));
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  let avatar;
+  if(userInfo){
+    avatar = userInfo.urlImageSet[0]
+  }else if(user){
+    console.log(user)
+    avatar = user.fileList[0].fileDownloadUri
+  }
+  // useEffect
   useEffect(() => {
     if (axios) {
       axios
         .get(`/notification/findByIdUser/${user.id}`)
         .then((res) => {
+          console.log(res.data)
           setNotiReaded(
             res.data.filter((item) => item.status === "1").map((e) => e.id)
           );
           setNotiNumber(res.data.filter((item) => item.status === "1").length);
-          setData(res.data);
+          setData(res.data.reverse());
         })
         .catch((err) => console.log(err));
     }
   }, []);
   console.log(notinumber);
 
-  const readNoti = (id, message, idproduct) => {
-    console.log(message)
+  // readNoti
+  const readNoti = (id) => {
+    let noti = data.filter(item => item.id === id)[0]
+    console.log(noti)
+    let notiComment;
+    if(noti.type && noti.type.includes('comment')){
+      notiComment =noti.type.split('-')[1]
+    }
     axios
       .put(`/notification/updateStatus/${id}`)
-      .then(() => {
-        // setNotiReaded(notireaded.filter(item => item !== id))
-        // setNotiNumber(notireaded.filter(item => item !== id).length)
-        if (idproduct.length > 0) {
-          navigate(`/product/${idproduct}`);
-        } else {
-          switch (message) {
-            case String(message).includes(/gửi/g):
-              console.log(message)
+      .then((res) => {
+        console.log(res.data)
+        setNotiReaded(notireaded.filter(item => item !== id))
+        setNotiNumber(notireaded.filter(item => item !== id).length)
+          switch (noti.type) {
+            case 'bill':
               navigate("/sell/manager");
               break;
-            case message.includes("deleted") || message.includes("active"):
-              navigate("/user/await");
+            case `comment-${notiComment}`:
+              navigate(`/product/${notiComment}`);
               break;
             default:
-              navigate("/");
+              navigate("/user/profile");
               break;
           }
         }
-      })
+      )
       .catch((err) => console.log(err));
   };
   return (
@@ -182,15 +202,21 @@ export default function Navbars() {
             </Link>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse id="responsive-navbar-nav" className="text-start">
+
+              {/* menu */}
               <Nav className="me-auto ms-3">
                 {menu.menu1.map((item, index) =>
                   item.name === "Thông báo" ? (
                     <div
                       className="mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0"
                       key={index}
+                      onClick={visibleNoti ? hideNoti : showNoti}
+                      role='button'
                     >
                       <Tippy
                         key={index}
+                        visible={visibleNoti} 
+                        onClickOutside={hideNoti}
                         interactive
                         placement="bottom"
                         render={(attrs) => (
@@ -212,7 +238,7 @@ export default function Navbars() {
                                 data.map((item, index) => (
                                   <li
                                     onClick={() =>
-                                      readNoti(item.id, item.message, "")
+                                      readNoti(item.id)
                                     }
                                     key={index}
                                     role="button"
@@ -268,9 +294,11 @@ export default function Navbars() {
               </Nav>
               <Nav>
                 {user ? (
-                  <div className="nav-profile">
+                  <div className="nav-profile" role='button' onClick={visibleUser ? hideUser : showUser} >
                     <Tippy
                       interactive
+                      onClickOutside={hideUser}
+                      visible={visibleUser}
                       placement="bottom-end"
                       render={(attrs) => (
                         <div
@@ -285,10 +313,7 @@ export default function Navbars() {
                               <div className="me-2">
                                 <img
                                   src={
-                                    user.fileList[0]
-                                      ? user.fileList[0].fileDownloadUri
-                                      : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
-                                  }
+                                    avatar}
                                   width="25px"
                                   height="25px"
                                   className="rounded-pill"
@@ -355,11 +380,7 @@ export default function Navbars() {
                       <div className="d-flex ms-3 mt-3 mt-sm-3 mt-md-3 mt-lg-0 mt-xl-0 justify-content-sm-start justify-content-md-start justify-content-lg-center justify-content-xl-center align-items-center">
                         <div className="me-3">
                           <img
-                            src={
-                              user.fileList[0]
-                                ? user.fileList[0].fileDownloadUri
-                                : "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"
-                            }
+                            src={avatar}
                             width="50px"
                             height="50px"
                             className="rounded-pill"

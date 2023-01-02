@@ -9,6 +9,7 @@ import {
   faTrash,
   faCheckDouble,
   faArrowLeft,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { axiosx as axios } from "../../Helper";
 export default function SellerManager() {
@@ -18,6 +19,7 @@ export default function SellerManager() {
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkList, setCheckList] = useState([]);
   const [data, setData] = useState(orderList.length > 0 ? orderList : [])
+  // useEffect
   useEffect(() => {
       axios
         .get(`/bill/selectByUser/${user.id}?status=pending`)
@@ -35,6 +37,7 @@ export default function SellerManager() {
       setCheckList([]);
     }
   };
+  // check many bill
   const checked = (id) => {
     if (checkList.includes(id)) {
       setCheckList(checkList.filter((item) => item !== id));
@@ -42,6 +45,7 @@ export default function SellerManager() {
       setCheckList([...checkList, id]);
     }
   };
+  // accept many bill
   const accept = (id) => {
     // let data = orderList.filter(item=> checkList.inculdes(item.idProduct))
     axios
@@ -54,6 +58,7 @@ export default function SellerManager() {
         enqueueSnackbar("Xác nhận giao hàng thất bại", { variant: "error" })
       );
   };
+  // delete many bill
   const deleteAll = () => {
     console.log(checkList.toString());
     axios
@@ -66,6 +71,7 @@ export default function SellerManager() {
       );
   };
 
+// remove bill 
   const remove = (id) => {
     axios
       .put(`/bill/updateStatus/${id}?status=deleted`)
@@ -101,6 +107,7 @@ export default function SellerManager() {
             <FontAwesomeIcon icon={faTrash} className="mr-0" /> Xóa nhiều
           </button>
         </div>
+        {/* table load data */}
         <div className="mt-3 bg-white rounded-3 shadow-sm">
           <Table striped bordered hover>
             <thead>
@@ -111,7 +118,8 @@ export default function SellerManager() {
                 <th>Giá</th>
                 <th>Số Lượng</th>
                 <th>Người đặt</th>
-                <th>Ngày đặt</th>
+                {/* <th>Ngày đặt</th> */}
+                <th>Địa chỉ</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>
@@ -130,25 +138,34 @@ export default function SellerManager() {
                     <td className="col-1">
                       <img src={item.product.urlFile[0] } alt="" width="100px" />
                     </td>
-                    <td>{item.product.productName}</td>
+                    <td>
+                    <span className="limit-text">
+                    {item.product.productName}
+                      </span>
+                    </td>
                     <td>{item.product.price}</td>
                     <td>{item.amount}</td>
                     <td>{item.user.username}</td>
-                    <td>{item.createDate}</td>
+                    {/* <td>{item.createDate}</td> */}
+                    <td>
+                      <span className="limit-text">
+                      {item.address}
+                      </span>
+                    </td>
                     <td>
                       <button
                         type="button"
                         onClick={() => accept(item.idBill)}
-                        className="btn btn-info me-2"
+                        className="btn btn-sm btn-outline-success me-2"
                       >
-                        Giao hàng
+                        <FontAwesomeIcon icon={faCheck}/>
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-sm btn-outline-danger"
                         onClick={() => remove(item.idBill)}
                       >
-                        Hủy
+                        <FontAwesomeIcon icon={faTrash}/>
                       </button>
                     </td>
                   </tr>

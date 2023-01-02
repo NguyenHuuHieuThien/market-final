@@ -18,6 +18,7 @@ export default function HomePage() {
     productCategory.length > 0 ? productCategory : []
   );
 
+// useEffect 
   useEffect(() => {
     axios
       .get("http://localhost:8080/category/searchAll")
@@ -40,12 +41,16 @@ export default function HomePage() {
       });
       
   }, [data]);
+
+  //get all product
   const productAll = () => {
     setIsLoading(true);
     setData(productCategory);
     setIsLoading(false);
 
   };
+
+  //select category to filter product 
   const selectCategory = (id) => {
     // setIsLoading(true);
     axios
@@ -72,6 +77,7 @@ export default function HomePage() {
           <h2>Danh mục</h2>
           <div>
             <div>
+              {/* load category list */}
               {category.length > 0 ?
                 <div className="row">
                 {category.map((item) => (
@@ -101,6 +107,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* load new product */}
       <div className="container mt-3  bg-white shadow-sm">
         <h2 className="border-underline py-3 sticky-top  bg-white">
           Sản phẩm mới
@@ -112,35 +120,33 @@ export default function HomePage() {
               productCategory && productCategory.length > 0 ? (
                 productCategory.map((item, index) => (
                   <div
-                    key={index}
-                    className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
-                  >
-                    <div className="bg-white border-main">
-                      <Link
-                        to={`/product/${item.idProduct}`}
-                        style={{ textDecoration: "none" }}
-                      >
-                        <div className="w-100">
-                          <img
-                            src={item.urlFile[0]}
-                            style={{ width: "100%", height: "155px" }}
-                          />
+                  key={index}
+                  className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
+                >
+                  <div className="bg-white border-main">
+                    <Link
+                      to={`/product/${item.idProduct}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <div className="">
+                        <img
+                          src={item.urlFile[0]}
+                          style={{ width: "100%", height: "155px" }}
+                        />
+                      </div>
+                      <div className="px-3 pb-2 mt-2 text-center">
+                        <div className="fs-13 limit-text">
+                          {item.productName}
                         </div>
-                        <div className="px-3 pb-2 mt-2 text-center text-black">
-                          <div style={{ fontSize: "12px" }}>
-                            {item.productName}
-                          </div>
-                          <div className="text-main fs-13">
-                            {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(item.price)}
-                          </div>
-                          <div className="form-text">Còn {item.amount}</div>
-                        </div>
-                      </Link>
-                    </div>
+                        <div className="text-main fs-13"> {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(item.price)}</div>
+                        <div className="form-text">Còn {item.amount}</div>
+                      </div>
+                    </Link>
                   </div>
+                </div>
                 ))
               ) : (
                 <div className="col-12">
@@ -153,6 +159,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* load product */}
       <div className="container mt-3 mb-5  bg-white shadow-sm">
         <h2 className="border-underline py-3 sticky-top  bg-white">
           Gợi ý Hôm nay
@@ -204,6 +212,8 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
+
+      {/* system description */}
       <div className="container mt-3 mb-5 text-start">
         <div className="p-3">
           <div className="text-uppercase fw-bold mb-3">

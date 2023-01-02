@@ -62,7 +62,7 @@ export default function AwaitAccept() {
 
       <BgUser>
         <h1 className=" bg-white py-5 rounded-3 border-underline">
-          Đang chờ xác nhận
+          Đơn hàng đang chờ xác nhận
         </h1>
         <div className="mt-3 bg-white rounded-3 shadow-sm">
           <Table striped bordered hover>
@@ -91,11 +91,12 @@ export default function AwaitAccept() {
                           />
                         </td> */}
                     <td className="col-1">
+                      <Link to={`/product/${item.product.idProduct}`}>
                       <img
                         src={item.product?.urlFile[0]}
                         alt=""
                         width="100px"
-                      />
+                      /></Link>
                     </td>
                     <td>{item.product?.productName}</td>
                     <td>{item.product?.price}</td>

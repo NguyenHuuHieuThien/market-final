@@ -75,6 +75,7 @@ export default function ProductList() {
       .catch((err) => console.log(err)); 
   };
   console.log(isLoading)
+  
   useEffect(() => {
     setIsLoading(true)
       axios
