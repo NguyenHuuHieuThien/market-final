@@ -179,9 +179,9 @@ export default function Navbars() {
   }
 
   let menuUser = [];
-  if(user.roles[0] === "ROLE_MODERATOR"){
+  if(user && user.roles[0] === "ROLE_MODERATOR"){
     menuUser = sellerMenu;
-  }else if(user.roles[0] === "ROLE_USER"){
+  }else if(user && user.roles[0] === "ROLE_USER"){
     menuUser = userMenu;
   }else{
     menuUser = adminMenu;

@@ -22,11 +22,9 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const theme = createTheme();
 export default function SignUp() {
-  let noAvt = 'https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg'
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [showpass, setShowPass] = useState(false);
-  const [images, setImages] = useState(new File([""], 'noavt.jpg') )
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -39,7 +37,7 @@ export default function SignUp() {
       address: "",
       birthday: "",
       sex: "",
-      file: new File([""], 'noavt.jpg', {type: "image/jpeg"})
+      file: new File([""], "")
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -86,7 +84,7 @@ export default function SignUp() {
     formData.append("birthday", values.birthday);
     formData.append("role", values.role);
     formData.append("file", values.file);
-
+      console.log('error')
     axios
       .post("http://localhost:8080/api/auth/signup", formData)
       .then(() => {
@@ -94,11 +92,11 @@ export default function SignUp() {
         navigate("/sign-in");
       })
       .catch((err) => {
+        console.log(err)
         enqueueSnackbar(err.response.data.message, { variant: "error" });
       });
   }
   });
-  console.log(images)
   console.log(formik.values)
   return (
     <ThemeProvider theme={theme}>
