@@ -22,6 +22,7 @@ export default function AddproductPage() {
   const [idcategory, setIdCategory] = useState(1);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("token"));
+  // useEffect
   useEffect(() => {
     if (axios) {
       axios
@@ -42,6 +43,8 @@ export default function AddproductPage() {
       }
     }
   }, []);
+
+  // handle data product
   const handle = (e) => {
     if (id) {
       let newData = { ...dataUpdate };
@@ -60,6 +63,7 @@ export default function AddproductPage() {
     }
   };
 
+  // add and edit product
   const submit = (e) => {
     e.preventDefault();
     if (id) {
@@ -70,10 +74,12 @@ export default function AddproductPage() {
       formData.append("description", dataUpdate.description);
       formData.append("tradePark", dataUpdate.tradePark);
       formData.append("amount", dataUpdate.amount);
-      if (dataUpdate && dataUpdate.files.length > 0) {
+      if (dataUpdate.files && dataUpdate.files.length > 0) {
         for (let i = 0; i < dataUpdate.files.length; i++) {
           formData.append("files", dataUpdate.files[i]);
         }
+      }else{
+        formData.append("files", new File([""], ""));
       }
       axios.put(`/product/update/${id}`, formData, {
         headers: {

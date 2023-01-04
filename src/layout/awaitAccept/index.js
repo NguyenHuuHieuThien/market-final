@@ -117,8 +117,7 @@ export default function AwaitAccept() {
               ) : (
                 <tr>
                   <td colSpan="8">
-                    Chưa có bài đăng nào.
-                    <Link to="/sign-up">Tạo mới một bài đăng người dùng</Link>
+                    Chưa có sản phẩm nào.
                   </td>
                 </tr>
               )}

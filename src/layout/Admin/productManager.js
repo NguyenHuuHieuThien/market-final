@@ -193,8 +193,9 @@ export default function ProductManager() {
             </Modal.Footer>
           </Modal>
           <div className="row">
+            {/* profile menu */}
             <div
-              className="col-3 bg-white rounded-2 p-0 ms-5"
+              className="col-3 bg-white rounded-2 p-0"
               style={{ minHeight: "100vh" }}
             >
               <div className="w-100 sticky-top ">
@@ -228,20 +229,22 @@ export default function ProductManager() {
                 Duyệt sản phẩm
               </h1>
               <div className="bg-white rounded-3 shadow-sm">
+                {/* action */}
                 <div className="row p-3">
                   <div className="col-8 d-flex align-items-center justify-content-between w-100">
                     <div className="col-6 d-flex">
+                      {products.length > 0 && 
                       <button
-                        role="button"
-                        onClick={checkAll}
-                        className={`border-0 me-1 py-1 text-white px-2 bg-success`}
-                      >
-                        <FontAwesomeIcon
-                          icon={faCheckDouble}
-                          className="mr-0"
-                        />{" "}
-                        Chọn tất cả
-                      </button>
+                      role="button"
+                      onClick={checkAll}
+                      className={`border-0 me-1 py-1 text-white px-2 bg-success`}
+                    >
+                      <FontAwesomeIcon
+                        icon={faCheckDouble}
+                        className="mr-0"
+                      />{" "}
+                      Chọn tất cả
+                    </button>}
                       {checkList.length > 0 && (
                         <button
                           role="button"
@@ -277,6 +280,8 @@ export default function ProductManager() {
                   </div>
                 </div>
               </div>
+
+              {/* load data on table */}
               <div className="mt-3 bg-white rounded-3 shadow-sm">
                 <Table striped bordered hover>
                   <thead>

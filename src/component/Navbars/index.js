@@ -101,7 +101,7 @@ export default function Navbars() {
       link: "/product/add",
     },
     {
-      name: "Đơn hàng đang chờ duyệt",
+      name: "Quản lý đơn hàng",
       icon: faCheck,
       link: "/sell/manager",
     },
@@ -121,6 +121,41 @@ export default function Navbars() {
       },
     },
   ];
+
+  const adminMenu = [
+    {
+      name: "Đi tới Admin",
+      icon: faUser,
+      link: "/admin/users",
+    },
+    {
+      name: "Trang cá nhân",
+      icon: faUser,
+      link: "/user/profile",
+    },
+    {
+      name: "Quản lý sản phẩm",
+      icon: faCheck,
+      link: "/admin/products",
+    },
+    {
+      name: "Quản lý tài khoản",
+      icon: faCheck,
+      link: "/admin/users",
+    },
+    {
+      name: "Đăng xuất",
+      icon: faRightFromBracket,
+      logout: function () {
+        localStorage.clear();
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      },
+    },
+  ]
+
+
   const [data, setData] = useState([]);
   const [notireaded, setNotiReaded] = useState([]);
   const [notinumber, setNotiNumber] = useState(0);
@@ -141,6 +176,15 @@ export default function Navbars() {
   }else if(user){
     console.log(user)
     avatar = user.fileList[0].fileDownloadUri
+  }
+
+  let menuUser = [];
+  if(user.roles[0] === "ROLE_MODERATOR"){
+    menuUser = sellerMenu;
+  }else if(user.roles[0] === "ROLE_USER"){
+    menuUser = userMenu;
+  }else{
+    menuUser = adminMenu;
   }
   // useEffect
   useEffect(() => {
@@ -292,6 +336,8 @@ export default function Navbars() {
                   )
                 )}
               </Nav>
+
+              {/* user menu */}
               <Nav>
                 {user ? (
                   <div className="nav-profile" role='button' onClick={visibleUser ? hideUser : showUser} >
@@ -320,60 +366,27 @@ export default function Navbars() {
                                 />
                               </div>
                               <div>
-                                <span className="fw-bold">{user.name}</span>
+                                <span className="fw-bold">{user.username}</span>
                               </div>
                             </div>
                               <div>Xem trang cá nhân</div>
                               </Link>
                           </div>
-                          {user.roles[0] === "ROLE_ADMIN" && (
-                            <Link
-                              to="/admin/users"
+                          {
+                            menuUser.map(item =>
+                              <Link
+                              to={item.link}
                               style={{ textDecoration: "none" }}
                             >
                               <div className="nav-profile-detail-item text-black py-2 text-start">
                                 <FontAwesomeIcon
-                                  icon={faHome}
+                                  icon={item.icon}
                                   className="me-4"
                                 />
-                                Đi tới Admin
+                                {item.name}
                               </div>
-                            </Link>
-                          )}
-
-                          {user.roles[0] === "ROLE_MODERATOR"
-                            ? sellerMenu.map((item, index) => (
-                                <Link
-                                  to={item.link}
-                                  onClick={item?.logout}
-                                  style={{ textDecoration: "none" }}
-                                  key={index}
-                                >
-                                  <div className="nav-profile-detail-item text-black py-2 text-start">
-                                    <FontAwesomeIcon
-                                      icon={item.icon}
-                                      className="me-4"
-                                    />
-                                    {item.name}
-                                  </div>
-                                </Link>
-                              ))
-                            : userMenu.map((item, index) => (
-                                <Link
-                                  to={item.link}
-                                  onClick={item?.logout}
-                                  style={{ textDecoration: "none" }}
-                                  key={index}
-                                >
-                                  <div className="nav-profile-detail-item py-2 text-black text-start">
-                                    <FontAwesomeIcon
-                                      icon={item.icon}
-                                      className="me-4"
-                                    />
-                                    {item.name}
-                                  </div>
-                                </Link>
-                              ))}
+                            </Link> )
+                          }
                         </div>
                       )}
                     >

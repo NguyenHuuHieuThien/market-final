@@ -101,6 +101,7 @@ export default function ProductPage() {
               {category.map((item) => (
                 <div
                   onClick={() => selectCategory(item.idCategory)}
+                  role='button'
                   key={item.idCategory}
                   className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
                 >
@@ -113,7 +114,7 @@ export default function ProductPage() {
                 onClick={productAll}
                 className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
               >
-                <div className="category-color pe-2">
+                <div className="category-color pe-2" role='button'>
                   <span>Tất cả sản phẩm</span>
                 </div>
               </div>
@@ -145,7 +146,7 @@ export default function ProductPage() {
               {isLoading ? (
                 <Spinner/>
               ) : productCategory.length > 0 ? (
-                <div className=" overflow-auto row"  style={{height: '500px'}}>
+                <div className=" overflow-auto row"  style={{maxHeight: '500px'}}>
                   {productCategory.map(
                     (product, index) =>
                       product.amount > 0 && (

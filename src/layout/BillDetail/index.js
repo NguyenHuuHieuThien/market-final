@@ -54,7 +54,7 @@ export default function SellBill() {
         console.log(checkList.toString())
         axios.put(`/product/deleteListProduct/${checkList.toString()}`)
         .then(()=>enqueueSnackbar('Xóa sản phẩm thành công', {variant: 'success'}))
-        .catch(()=>enqueueSnackbar('Xóa sản phẩm thất bại', {variant: 'danger'}))
+        .catch(()=>enqueueSnackbar('Xóa sản phẩm thất bại', {variant: 'error'}))
       }
 
     const remove = (id) =>{

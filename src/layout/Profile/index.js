@@ -32,18 +32,25 @@ export default function ProfilePage() {
   const [data, setData] = useState();
   const [dataUpdate, setDataUpdate] = useState("");
   const [userinfo, setUserInfo] = useState(user);
+  let avatar;
+  if (userInfo) {
+    avatar = userInfo.urlImageSet[0];
+  } else if (user) {
+    console.log(user);
+    avatar = user.fileList[0].fileDownloadUri;
+  }
 
   const handle = (e) => {
     setDataUpdate(e.target.value);
     console.log(dataUpdate);
   };
   useEffect(() => {
-    console.log(userInfo)
+    console.log(userInfo);
     setIsLoading(true);
     axios
       .get(`/bill/select/${user.id}?status=active`)
       .then((res) => {
-        console.log(res.data)
+        console.log(res.data);
         setData(res.data);
         setIsLoading(false);
       })
@@ -100,7 +107,7 @@ export default function ProfilePage() {
                 <MDBCardBody className="text-center shadow-sm">
                   <div className="d-flex justify-content-center">
                     <MDBCardImage
-                      src={userInfo ? userInfo?.urlImageSet[userInfo.urlImageSet.length-1]: "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png" }
+                      src={avatar}
                       alt="avatar"
                       className="rounded-pill"
                       style={{ width: "150px", height: "150px" }}
@@ -111,7 +118,9 @@ export default function ProfilePage() {
                     <span className="fw-bold mb-1 d-block ">
                       {userInfo?.username ?? user?.username}
                     </span>
-                    <span className="text-muted mb-4">{userInfo?.fullName ?? user?.name}</span>
+                    <span className="text-muted mb-4">
+                      {userInfo?.fullName ?? user?.name}
+                    </span>
                   </div>
                 </MDBCardBody>
               </MDBCard>
@@ -169,7 +178,9 @@ export default function ProfilePage() {
                     </MDBCol>
                     <MDBCol sm="9">
                       <MDBCardText className="text-muted">
-                        {userInfo?.sex === "male"?? user?.sex === "male" ? "Nam" : "Nữ"}
+                        {userInfo?.sex === "male" ?? user?.sex === "male"
+                          ? "Nam"
+                          : "Nữ"}
                       </MDBCardText>
                     </MDBCol>
                   </MDBRow>
@@ -212,9 +223,19 @@ export default function ProfilePage() {
                     ) : data && data.length > 0 ? (
                       data.map((item, index) => (
                         <tr key={index}>
-                          <td><img style={{width: '50px'}} src={item.product.urlFile[0]}/></td>
+                          <td>
+                            <img
+                              style={{ width: "50px" }}
+                              src={item.product.urlFile[0]}
+                            />
+                          </td>
                           <td>{item.product.productName}</td>
-                          <td>{item.product.price}</td>
+                          <td>
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(item.product.price)}
+                          </td>
                           <td>{item.amount}</td>
                           <td>{item.createDate}</td>
                         </tr>

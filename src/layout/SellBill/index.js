@@ -54,7 +54,7 @@ export default function SellBill() {
         enqueueSnackbar("Xóa sản phẩm thành công", { variant: "success" })
       )
       .catch(() =>
-        enqueueSnackbar("Xóa sản phẩm thất bại", { variant: "danger" })
+        enqueueSnackbar("Xóa sản phẩm thất bại", { variant: "error" })
       );
   };
 

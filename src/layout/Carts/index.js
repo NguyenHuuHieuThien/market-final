@@ -77,6 +77,7 @@ export default function Carts() {
       .post(`/bill/save?idUser=${user.id}`, _data)
       .then(() => {
         enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" });
+        handleClose();
       })
       .catch((err) =>{
         console.log(err)

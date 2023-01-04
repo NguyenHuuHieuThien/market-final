@@ -29,22 +29,30 @@ export default function SellerManager() {
   })
         .catch((err) => console.log(err));
   }, [data]);
-  const checkAll = () => {
-    setIsCheckAll(!isCheckAll);
-    if (!isCheckAll) {
-      setCheckList(orderList.map((item) => item.idProduct));
-    } else {
-      setCheckList([]);
-    }
-  };
+  // const checkAll = () => {
+  //   setIsCheckAll(!isCheckAll);
+  //   if (!isCheckAll) {
+  //     setCheckList(orderList.map((item) => item.idProduct));
+  //   } else {
+  //     setCheckList([]);
+  //   }
+  // };
   // check many bill
-  const checked = (id) => {
-    if (checkList.includes(id)) {
-      setCheckList(checkList.filter((item) => item !== id));
-    } else {
-      setCheckList([...checkList, id]);
-    }
-  };
+//   const checked = (id) => {
+//     if(checkList.length ===0){
+//       setCheckList(checkList.push(id))
+//     }else{
+//       if(checkList.includes(id)){
+//         setCheckList(checkList.splice(checkList.indexOf(id),1))
+//       }else{
+//         setCheckList(checkList.push(id))
+//       }
+//     }
+//     orderList.map(item => {
+//       item.checked = checkList.includes(id)
+//       return item
+//     })
+// }
   // accept many bill
   const accept = (id) => {
     // let data = orderList.filter(item=> checkList.inculdes(item.idProduct))
@@ -59,17 +67,17 @@ export default function SellerManager() {
       );
   };
   // delete many bill
-  const deleteAll = () => {
-    console.log(checkList.toString());
-    axios
-      .put(`/product/deleteListProduct/${checkList.toString()}`)
-      .then(() =>
-        enqueueSnackbar("Xóa sản phẩm thành công", { variant: "success" })
-      )
-      .catch(() =>
-        enqueueSnackbar("Xóa sản phẩm thất bại", { variant: "danger" })
-      );
-  };
+  // const deleteAll = () => {
+  //   console.log(checkList.toString());
+  //   axios
+  //     .put(`/product/deleteListProduct/${checkList}?status=deleted`)
+  //     .then(() =>
+  //       enqueueSnackbar("Xóa sản phẩm thành công", { variant: "success" })
+  //     )
+  //     .catch(() =>
+  //       enqueueSnackbar("Xóa sản phẩm thất bại", { variant: "error" })
+  //     );
+  // };
 
 // remove bill 
   const remove = (id) => {
@@ -88,12 +96,12 @@ export default function SellerManager() {
     <div>
       <BgUser>
         <h1 className=" bg-white py-5 rounded-3 border-underline">
-          Phê duyệt đơn đặt hàng
+          Quản lý đơn hàng
         </h1>
         <div className="col-6 d-flex">
           <button
             role="button"
-            onClick={checkAll}
+            // onClick={checkAll}
             className={`border-0 me-1 py-1 text-white px-2 bg-success`}
           >
             <FontAwesomeIcon icon={faCheckDouble} className="mr-0" /> Chọn tất
@@ -102,7 +110,7 @@ export default function SellerManager() {
           <button
             role="button"
             className={`border-0 me-1 py-1 text-white px-2 bg-danger`}
-            onClick={deleteAll}
+            // onClick={deleteAll}
           >
             <FontAwesomeIcon icon={faTrash} className="mr-0" /> Xóa nhiều
           </button>
@@ -131,8 +139,8 @@ export default function SellerManager() {
                       <input
                         className="form-check-input"
                         type="checkbox"
-                        onChange={() => checked(item.idProduct)}
-                        checked={checkList.includes(item.idProduct)}
+                        // onChange={() => checked(item.product.idProduct)}
+                        // checked={item.checked}
                       />
                     </td>
                     <td className="col-1">

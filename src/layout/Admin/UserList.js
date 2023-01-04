@@ -46,16 +46,12 @@ export default function UserList() {
     setUserId(id);
   };
   const [userid, setUserId] = useState();
-  const [isCheckAll, setIsCheckAll] = useState(false);
-  const [checkList, setCheckList] = useState([]);
   const [searchData, setSearchData] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  console.log(checkList);
   const [data, setData] = useState([]);
   const [ids, setIds] = useState([
     data.length > 0 ? data.map((item) => item.idProduct) : [],
   ]);
-  let user = JSON.parse(localStorage.getItem("token"));
   useEffect(() => {
     if (axios) {
       axios
@@ -68,9 +64,13 @@ export default function UserList() {
         });
     }
   }, [ids]);
+
+  // reload user list
   const reload = () => {
     setIds(data.map((item) => item.idUser));
   };
+
+  // delete user
   const deleteUser = () => {
     axios
       .delete(`/user/delete/${userid}`)

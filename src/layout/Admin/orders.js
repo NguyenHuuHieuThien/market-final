@@ -44,26 +44,25 @@ export default function OrderList() {
   const [data, setData] = useState([]);
   const [ids, setIds] = useState([data.length>0?data.map(item=> item.idProduct):[]])
   let user = JSON.parse(localStorage.getItem("token"));
-  const checkAll = () => {
-    setIsCheckAll(!isCheckAll);
-    if (!isCheckAll) {
-      setCheckList(data.map((item) => item.idUser));
-    } else {
-      setCheckList([]);
-    }
-  };
-  const checked = (id) => {
-    if (checkList.includes(id)) {
-      setCheckList(checkList.filter((item) => item !== id));
-    } else {
-      setCheckList([...checkList, id]);
-    }
-  };
+  // const checkAll = () => {
+  //   setIsCheckAll(!isCheckAll);
+  //   if (!isCheckAll) {
+  //     setCheckList(data.map((item) => item.idUser));
+  //   } else {
+  //     setCheckList([]);
+  //   }
+  // };
+  // const checked = (id) => {
+  //   if (checkList.includes(id)) {
+  //     setCheckList(checkList.filter((item) => item !== id));
+  //   } else {
+  //     setCheckList([...checkList, id]);
+  //   }
+  // };
 
 
   console.log(data);
   useEffect(() => {
-    // setIsLoading(true);
     if (axios) {
       axios
         .get("/user/user-full")

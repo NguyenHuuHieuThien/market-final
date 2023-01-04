@@ -84,6 +84,7 @@ export default function HomePage() {
                     <div
                       onClick={() => selectCategory(item.idCategory)}
                       key={item.idCategory}
+                      role='button'
                       className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
                     >
                       <div className="category-color pe-2">
@@ -95,7 +96,7 @@ export default function HomePage() {
                   onClick={productAll}
                   className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 text-white mb-3"
                 >
-                  <div className="category-color pe-2">
+                  <div className="category-color pe-2" role='button'>
                     <span>Tất cả sản phẩm</span>
                   </div>
                 </div>
@@ -168,39 +169,44 @@ export default function HomePage() {
         <div>
           <div>
             <div className="row mt-2 p-1">
-              {product && product.length > 0 ? (
+            {isLoading ? <Spinner/> :
+              product && product.length > 0 ? (
                 product.map((item, index) => (
                   <div
-                    key={index}
-                    className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
-                  >
-                    <div className="bg-white border-main">
-                      <Link
-                        to={`/product/${item.idProduct}`}
-                        style={{ textDecoration: "none" }}
-                      >
-                        <div className="">
-                          <img
-                            src={item.urlFile[0]}
-                            style={{ width: "100%", height: "155px" }}
-                          />
+                  key={index}
+                  className="col-6 col-sm-6 col-md-4 col-lg-2 col-xl-2 mb-3"
+                >
+                  <div className="bg-white border-main">
+                    <Link
+                      to={`/product/${item.idProduct}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <div className="">
+                        <img
+                          src={item.urlFile[0]}
+                          style={{ width: "100%", height: "155px" }}
+                        />
+                      </div>
+                      <div className="px-3 pb-2 mt-2 text-center">
+                        <div className="fs-13 limit-text">
+                          {item.productName}
                         </div>
-                        <div className="px-3 pb-2 mt-2 text-center">
-                          <div style={{ fontSize: "12px" }}>
-                            {item.productName}
-                          </div>
-                          <div className="text-main fs-13"> {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(item.price)}</div>
-                          <div className="form-text">Còn {item.amount}</div>
-                        </div>
-                      </Link>
-                    </div>
+                        <div className="text-main fs-13"> {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(item.price)}</div>
+                        <div className="form-text">Còn {item.amount}</div>
+                      </div>
+                    </Link>
                   </div>
+                </div>
                 ))
               ) : (
-                <Spinner />
+                <div className="col-12">
+                <div className="alert alert-primary" role="alert">
+                  Không có sản phẩm nào.
+                </div>
+              </div>
               )}
             </div>
           </div>

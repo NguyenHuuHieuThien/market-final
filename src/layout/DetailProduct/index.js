@@ -23,7 +23,10 @@ export default function DetailProduct() {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const { enqueueSnackbar } = useSnackbar();
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState({
+    comment: "",
+    files: ""
+  });
   const [commentList, setCommentList] = useState([]);
   const [products, setProducts] = useState([]);
   const [amount, setAmount] = useState(1);
@@ -35,7 +38,7 @@ export default function DetailProduct() {
   const [sellerInfo, setSellerInfo] = useState();
   const [commentEdit, setCommentEdit] = useState();
   const [isEdit, setIsEdit] = useState(false);
-  const [idComment, setIdComment] = useState()
+  const [idComment, setIdComment] = useState();
   let { id } = useParams();
   const handleClose = () => setShow(false);
   const handleShow = () => {
@@ -44,20 +47,11 @@ export default function DetailProduct() {
   console.log(data);
   let user = JSON.parse(localStorage.getItem("token"));
   let userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  const handleChangeImage = (e) => {
-    setImage([...e.target.files]);
-    const selectedFiles = e.target.files;
-    const selectedFilesArr = Array.from(selectedFiles);
-    const imagesArr = selectedFilesArr.map((item) => URL.createObjectURL(item));
-    console.log(imagesArr);
-    setImgComment(imagesArr);
-  };
+
   const handleDeleteImage = (item, idex) => {
     setImage(image.filter((image, index) => index !== idex));
     setImgComment(imgComment.filter((e) => e !== item));
   };
-  console.log(imgComment);
-  console.log(image);
   let avatar;
   if (userInfo) {
     avatar = userInfo.urlImageSet[0];
@@ -67,16 +61,29 @@ export default function DetailProduct() {
   }
   // handle Comment
   const handleComment = (e) => {
+
     if (isEdit) {
       let newData = { ...commentEdit };
-      console.log(newData);
       newData[e.target.id] = e.target.value;
-      console.log("isEdit");
+      if(e.target.id === 'files'){
+        newData[e.target.id] = e.target.files;
+        const selectedFiles = e.target.files;
+        const selectedFilesArr = Array.from(selectedFiles);
+        const imagesArr = selectedFilesArr.map((item) => URL.createObjectURL(item));
+        setImgComment(imagesArr);
+      }
       setCommentEdit(newData);
-      console.log(newData);
     } else {
-      console.log("noEdit");
-      setComment(e.target.value);
+      let newData = { ...comment };
+      newData[e.target.id] = e.target.value;
+      if(e.target.id === 'files'){
+        newData[e.target.id] = e.target.files;
+        const selectedFiles = e.target.files;
+        const selectedFilesArr = Array.from(selectedFiles);
+        const imagesArr = selectedFilesArr.map((item) => URL.createObjectURL(item));
+        setImgComment(imagesArr);
+      }
+      setComment(newData);
     }
   };
   // comment
@@ -85,12 +92,13 @@ export default function DetailProduct() {
     if (isEdit) {
       let formData = new FormData();
       formData.append("commentContent", commentEdit.comment);
-      if (image && image.length > 0) {
-        for (let i = 0; i < image.length; i++) {
-          console.log(image[i]);
-          formData.append("files", image[i]);
+      if (commentEdit.files && commentEdit.files.length > 0) {
+        for (let i = 0; i < commentEdit.files.length; i++) {
+          console.log(commentEdit.files[i]);
+          formData.append("files", commentEdit.files[i]);
         }
       } else {
+        console.log('no files')
         formData.append("files", new File([""], ""));
       }
       axiosx
@@ -105,7 +113,8 @@ export default function DetailProduct() {
           });
           setTotalComment(totalComment + 1);
           document.getElementById("submitComment").reset();
-          setComment("");
+          setCommentEdit("");
+          setIsEdit(false)
           setImage(new File([""], ""));
           setImgComment([]);
         })
@@ -116,11 +125,11 @@ export default function DetailProduct() {
         return;
       }
       let formData = new FormData();
-      formData.append("commentContent", comment);
-      if (image && image.length > 0) {
-        for (let i = 0; i < image.length; i++) {
-          console.log(image[i]);
-          formData.append("files", image[i]);
+      formData.append("commentContent", comment.comment);
+      if (comment.files && comment.files.length > 0) {
+        for (let i = 0; i < comment.files.length; i++) {
+          console.log(comment.files[i]);
+          formData.append("files", comment.files[i]);
         }
       } else {
         formData.append("files", new File([""], ""));
@@ -148,13 +157,24 @@ export default function DetailProduct() {
     }
   };
 
+  const handleAmount = (action) => {
+    if(action === 'increase'){
+      setAmount(amount + 1)
+    }else{
+      if(amount === 0){
+        setAmount(0)
+        return;
+      }
+      setAmount(amount - 1)
+    }
+  }
   // get comment
   const getComment = (id) => {
     axiosx
       .get(`/comment/selectByIdComment/${id}`)
       .then((res) => {
         setCommentEdit(res.data);
-        setIdComment(id)
+        setIdComment(id);
         setIsEdit(true);
       })
       .catch((err) => console.log(err));
@@ -194,10 +214,10 @@ export default function DetailProduct() {
   useEffect(() => {
     axios
       .get(`http://localhost:8080/product/selectAll`)
-      .then((res) => {
+      .then(res => {
+        console.log(res.data)
         setData(res.data.filter((item) => item.idProduct === Number(id))[0]);
-        let userId = res.data.filter((item) => item.idProduct === Number(id))[0]
-          .idUser;
+        let userId = res.data.filter((item) => item.idProduct === Number(id))[0].idUser;
         axiosx
           .get(`/user/selectById/${userId}`)
           .then((res) => {
@@ -246,39 +266,6 @@ export default function DetailProduct() {
       );
   };
 
-  // convert image to file object
-  // const toDataURL = (url) =>
-  //   fetch(url)
-  //     .then((response) => response.blob())
-  //     .then(
-  //       (blob) =>
-  //         new Promise((resolve, reject) => {
-  //           const reader = new FileReader();
-  //           reader.onloadend = () => resolve(reader.result);
-  //           reader.onerror = reject;
-  //           reader.readAsDataURL(blob);
-  //         })
-  //     );
-
-  // const dataURLtoFile = (dataurl, filename) => {
-  //   var arr = dataurl.split(","),
-  //     mime = arr[0].match(/:(.*?);/)[1],
-  //     bstr = atob(arr[1]),
-  //     n = bstr.length,
-  //     u8arr = new Uint8Array(n);
-  //   while (n--) {
-  //     u8arr[n] = bstr.charCodeAt(n);
-  //   }
-  //   return new File([u8arr], filename, { type: mime });
-  // };
-
-  // toDataURL(url)
-  // .then(dataUrl => {
-  //    console.log('Here is Base64 Url', dataUrl)
-  //    var fileData = dataURLtoFile(dataUrl, "imageName.jpg");
-  //    console.log("Here is JavaScript File Object",fileData)
-  //    fileArr.push(fileData)
-  //  })
   return (
     <div>
       <div className="bg-main">
@@ -296,6 +283,7 @@ export default function DetailProduct() {
 
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
           {data ? (
+            // product info
             <Row>
               <Col md={6}>
                 <ImageGallery images={data.urlFile ? data.urlFile : []} />
@@ -315,7 +303,7 @@ export default function DetailProduct() {
                     <FontAwesomeIcon
                       icon={faCircleMinus}
                       role="button"
-                      onClick={() => setAmount(amount - 1)}
+                      onClick={() => handleAmount('decrease')}
                     />
                     <input
                       type="number"
@@ -325,15 +313,17 @@ export default function DetailProduct() {
                     <FontAwesomeIcon
                       icon={faCirclePlus}
                       role="button"
-                      onClick={() => setAmount(amount + 1)}
+                      onClick={() =>handleAmount('increase') }
                     />
                   </div>
                   <div className="form-text">
-                    {data.amount > 0 ? data.amount : 0} Số lượng có sẵn
+                    {data.amount > 0
+                      ? `${data.amount} Số lượng có sẵn`
+                      : "Hết hàng"}
                   </div>
                 </div>
                 {user && user.roles[0] === "ROLE_MODERATOR" ? (
-                  <Link to="/sign-in">
+                  <Link to={`/product/update/${data.idProduct}`}>
                     <span className="btn btn-success" role="button">
                       Sửa sản phẩm
                     </span>
@@ -344,19 +334,27 @@ export default function DetailProduct() {
                       user.roles[0] === "ROLE_USER" ? "d-block" : "d-none"
                     }`}
                   >
-                    <button
-                      className="btn bg-spotlight me-3"
-                      onClick={addToCart}
-                    >
-                      <FontAwesomeIcon icon={faCartPlus} className="me-2" />
-                      Thêm vào giỏ hàng
-                    </button>
-                    <button
-                      onClick={handleShow}
-                      className="btn btn-buy text-white"
-                    >
-                      Mua ngay
-                    </button>
+                    {data.amount > 0 ? (
+                      <div>
+                        <button
+                          className="btn bg-spotlight me-3"
+                          onClick={addToCart}
+                        >
+                          <FontAwesomeIcon icon={faCartPlus} className="me-2" />
+                          Thêm vào giỏ hàng
+                        </button>
+                        <button
+                          onClick={handleShow}
+                          className="btn btn-buy text-white"
+                        >
+                          Mua ngay
+                        </button>
+                      </div>
+                    ) : (
+                      <div class="alert alert-warning text-center" role="alert">
+                        Hết hàng
+                      </div>
+                    )}
                   </div>
                 )}
               </Col>
@@ -502,7 +500,7 @@ export default function DetailProduct() {
                     <input
                       type="text"
                       onChange={(e) => handleComment(e)}
-                      value={commentEdit ? commentEdit.comment : comment}
+                      value={commentEdit ? commentEdit.comment : comment.comment}
                       id="comment"
                       class="form-control"
                       placeholder="Nhập đánh giá..."
@@ -520,8 +518,7 @@ export default function DetailProduct() {
                     multiple
                     type="file"
                     onChange={(e) => {
-                      // setImage(e.target.files);
-                      handleChangeImage(e);
+                      handleComment(e);
                     }}
                   />
                   <div className="d-flex gap-2 mb-3">
@@ -547,9 +544,9 @@ export default function DetailProduct() {
               </div>
             )}
             {commentList.length > 0 && (
-              <div className=" overflow-auto row" style={{ height: "500px" }}>
+              <div className=" overflow-auto row" style={{ maxHeight: "500px" }}>
                 {commentList.map((item, index) => (
-                  <div key={index} className="mt-5">
+                  <div key={index} className="mt-3">
                     <div className="d-flex">
                       <div className="me-3">
                         <img

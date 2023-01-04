@@ -26,7 +26,7 @@ const profileMenu = [
   { name: "Trang sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Danh sách người dùng", link: "/admin/users", icon: faList },
   { name: "Phê duyệt bài đăng", link: "/admin/product/manager", icon: faCheck },
-  { name: "Quản lý sản phẩm", link: "/admin/product/list", icon: faList },
+  { name: "Quản lý sản phẩm", link: "/admin/products", icon: faList },
   { name: "Đăng xuất", link: "/", icon: faRightFromBracket },
 ];
 
@@ -45,7 +45,8 @@ export default function ProductList() {
     setShow(true);
     setId(id);
   };
-  let user = JSON.parse(localStorage.getItem("token"));
+
+  // delete product
   const deleted = (id) => {
     axios
       .put(`/product/deleteListProduct/${id}?status=deleted`)
@@ -58,9 +59,13 @@ export default function ProductList() {
         enqueueSnackbar("Đã bỏ bài đăng", { variant: "success" })
       );
   };
+
+  // reload
   const reload =()=> {
     setData(products)
   }
+
+  // search product
   const searchProduct = () => {
     axios
       .get(
@@ -74,8 +79,8 @@ export default function ProductList() {
       })
       .catch((err) => console.log(err)); 
   };
-  console.log(isLoading)
   
+  // useEffect
   useEffect(() => {
     setIsLoading(true)
       axios
@@ -88,7 +93,9 @@ export default function ProductList() {
         enqueueSnackbar("Không thể tải lên danh sách sản phẩm!!!", {variant: 'error'})
 
       });
-  }, []);
+  }, [data]);
+
+  // check all product
   const checkAll = () => {
     setIsCheckAll(!isCheckAll);
     if (!isCheckAll) {
@@ -97,6 +104,8 @@ export default function ProductList() {
       setCheckList([]);
     }
   };
+
+  // check many product
   const checked = (id) => {
     if (checkList.includes(id)) {
       setCheckList(checkList.filter((item) => item !== id));
@@ -105,6 +114,7 @@ export default function ProductList() {
     }
   };
 
+  //delete all product has been checked
   const deleteAll = () => {
     axios
       .put(`/product/deleteListProduct/${checkList}?status=deleted`)
@@ -142,7 +152,7 @@ export default function ProductList() {
           </Modal>
           <div className="row">
             <div
-              className="col-3 bg-white rounded-2 p-0 ms-5"
+              className="col-3 bg-white rounded-2 p-0"
               style={{ minHeight: "100vh" }}
             >
               <div className="w-100 sticky-top ">

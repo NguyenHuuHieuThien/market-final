@@ -59,7 +59,7 @@ const sellerMenu = [
   { name: "Trang cá nhân", link: "/user/profile", icon: faUser },
   { name: "Xem sản phẩm", link: "/product/list", icon: faTelevision },
   { name: "Sản phẩm đã đăng", link: "/sell/list", icon: faListCheck },
-  { name: "Phê duyệt đơn hàng", link: "/sell/manager", icon: faCheck },
+  { name: "Quản lý đơn hàng", link: "/sell/manager", icon: faCheck },
   {
     name: "Đăng xuất",
     link: "/",
