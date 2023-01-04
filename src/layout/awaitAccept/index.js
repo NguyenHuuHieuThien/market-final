@@ -87,7 +87,8 @@ export default function AwaitAccept() {
                             className="form-check-input"
                             type="checkbox"
                             onChange={() => checked(item.idProduct)}
-                            checked={checkList.includes(item.idProduct)}/>
+                            checked={checkList.includes(item.idProduct)}
+                            />
                         </td> */}
                     <td className="col-1">
                       <Link to={`/product/${item.product.idProduct}`}>
