@@ -36,7 +36,6 @@ export default function ProductPage() {
 
   //useEffect
   useEffect(() => {
-    setIsLoading(true);
     axios
       .get("http://localhost:8080/category/searchAll")
       .then((res) => {
@@ -46,14 +45,17 @@ export default function ProductPage() {
       .catch((err) => console.log(err));
     axios
       .get(
-        `http://localhost:8080/product/selectAllPaging?pageNo=0&pageSize=30&status=active`
+        `http://localhost:8080/product/selectAll`
       )
       .then((res) => {
         setProductList(res.data);
         setProductCategory(res.data);
+        setIsLoading(false);
       })
-      .catch((err) => console.log(err));
-    setIsLoading(false);
+      .catch((err) => {
+        console.log(err)
+        setIsLoading(false);
+      });
   }, [data]);
 
   //get all product when click all product

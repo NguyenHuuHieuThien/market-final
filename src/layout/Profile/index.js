@@ -224,10 +224,11 @@ export default function ProfilePage() {
                       data.map((item, index) => (
                         <tr key={index}>
                           <td>
-                            <img
+                           <Link to={`/product/${item?.product.idProduct}`}>
+                           <img
                               style={{ width: "50px" }}
                               src={item.product.urlFile[0]}
-                            />
+                            /></Link>
                           </td>
                           <td>{item.product.productName}</td>
                           <td>

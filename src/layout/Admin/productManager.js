@@ -37,48 +37,6 @@ const actions = [
   { name: "Xóa", icon: faTrash, bg: "danger" },
   { name: "Thùng rác", icon: faTrashCan, bg: "info" },
 ];
-// const products = [
-//     {
-//         name: 'table',
-//         price: 100,
-//         image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg',
-//         description: 'this is a table',
-//         date: '2021-11-11',
-//         quantity: 10
-//     },
-//     {
-//         name: 'motobike',
-//         price: 100,
-//         image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg',
-//         description: 'this is a motobike',
-//         date: '2021-11-11',
-//         quantity: 10
-//     },
-//     {
-//         name: 'chair',
-//         price: 100,
-//         image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg',
-//         description: 'this is a chair',
-//         date: '2021-11-11',
-//         quantity: 10
-//     },
-//     {
-//         name: 'cabinet',
-//         price: 100,
-//         image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg',
-//         description: 'this is a cabinet',
-//         date: '2021-11-11',
-//         quantity: 10
-//     },
-//     {
-//         name: 'bed',
-//         price: 100,
-//         image: 'https://cdn.popsww.com/blog/sites/2/2021/11/top-phim-co-trang-trung-quoc-moi.jpg',
-//         description: 'this is a bed',
-//         date: '2021-11-11',
-//         quantity: 10
-//     },
-// ]
 
 export default function ProductManager() {
   const { enqueueSnackbar } = useSnackbar();
@@ -121,7 +79,7 @@ export default function ProductManager() {
   useEffect(() => {
     setIsLoading(true)
     axios
-      .get("/product/selectAll")
+      .get("/product/selectPending")
       .then((res) => {
         setProducts(res.data.filter((item) => item.status === "pending"));
         setIsLoading(false)
@@ -164,6 +122,8 @@ export default function ProductManager() {
       .put(`/product/deleteListProduct/${checkList}?status=active`)
       .then(() => {
         handleClose();
+        setIds(ids.filter(item=> !checkList.includes(item)))
+        setCheckList([])
         enqueueSnackbar("Đã phê duyệt bài đăng", { variant: "success" });
       })
       .catch((err) =>

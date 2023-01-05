@@ -83,7 +83,7 @@ function Adduser() {
       formData.append("birthday", dataUpdate.birthday);
       formData.append("email", dataUpdate.email);
       formData.append("fullName", dataUpdate.fullName);
-      formData.append("password", dataUpdate.password);
+      // formData.append("password", dataUpdate.password);
       formData.append("phoneNumber", dataUpdate.phoneNumber);
       formData.append("sex", dataUpdate.sex);
       formData.append("username", dataUpdate.username);

@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import Navbars from "../../component/Navbars";
+import province from "./../../Province/data.json";
 import Footer from "../../component/Footer";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,6 +17,7 @@ import {
   faCircleCheck,
   faCircleMinus,
   faCartPlus,
+  faTruck
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect } from "react";
 import Spinner from "../../component/Spinner";
@@ -27,6 +29,12 @@ export default function DetailProduct() {
     comment: "",
     files: ""
   });
+  const [ward, setWard] = useState([]);
+  const [districtName, setDistrictName] = useState("");
+  let provinces = Object.values(province);
+  let district = Object.values(provinces[26]["quan-huyen"]);
+  const [address, setAddress] = useState("");
+  const [wardName, setWardName] = useState("");
   const [commentList, setCommentList] = useState([]);
   const [products, setProducts] = useState([]);
   const [amount, setAmount] = useState(1);
@@ -51,6 +59,16 @@ export default function DetailProduct() {
   const handleDeleteImage = (item, idex) => {
     setImage(image.filter((image, index) => index !== idex));
     setImgComment(imgComment.filter((e) => e !== item));
+  };
+  const handleDistrict = (value) => {
+    setWard(
+      Object.values(
+        district.filter((item) => item.code === value)[0]["xa-phuong"]
+      ).map((item) => item.name)
+    );
+    setDistrictName(
+      district.filter((item) => item.code == value)[0].name + ", "
+    );
   };
   let avatar;
   if (userInfo) {
@@ -240,22 +258,29 @@ export default function DetailProduct() {
 
   //order
   const order = () => {
+    if(address.length === 0 || wardName.length === 0 || districtName.length === 0 ){
+      enqueueSnackbar('Vui lòng nhập địa chỉ giao hàng', {variant: 'error'})
+      return
+     }
     if (amount > data.amount) {
       enqueueSnackbar("Số lượng sản phẩm còn lại không đủ", {
         variant: "error",
       });
       return;
     }
-    let _data = { ...data };
-    delete _data.product;
-    _data.totalPrice = amount * data.price;
     let date = new Date();
-    _data.createDate = `${date.getFullYear()}-${
-      date.getMonth() + 1
-    }-${date.getDate()}`;
-    _data.amount = amount;
+    let _data = {
+      totalPrice : amount * data.price,
+      createDate : `${date.getFullYear()}-${
+        date.getMonth() + 1
+      }-${date.getDate()}`,
+      amount,
+      address: document.getElementById('address').innerText,
+      idProducts : [parseInt(id)]
+    }
+    console.log(_data)
     axiosx
-      .post(`/bill/save?idUser=${user.id}&idProduct=${id}`, _data)
+      .post(`/bill/save?idUser=${user.id}`, _data)
       .then(() => {
         handleClose();
         enqueueSnackbar("Đã đặt đơn hàng", { variant: "success" });
@@ -271,14 +296,69 @@ export default function DetailProduct() {
       <div className="bg-main">
         {/* Modal React */}
         <ModalReact
-          show={show}
-          title="Đặt sản phẩm"
-          handleClose={handleClose}
-          handleFunction={order}
-          handleShow={handleShow}
-        >
-          Bạn muốn đặt sản phẩm này?
-        </ModalReact>
+            show={show}
+            title="Đặt sản phẩm"
+            handleClose={handleClose}
+            handleFunction={order}
+            handleShow={handleShow}
+          >
+            <form>
+            <div className="d-flex mb-2">
+              <div className="me-3">
+                <FontAwesomeIcon icon={faTruck} className="me-2" />
+                Vận chuyển tới
+              </div>
+              <div className="row">
+                <div className="col-12 col-sm-12 col-md-12 cl-lg-4 col-xl-4">
+                  <select
+                    class="form-select"
+                    required
+                    onChange={(e) => handleDistrict(e.target.value)}
+                  >
+                    <option>-- Chọn Quận/huyện --</option>
+                    {district.map((item, index) => (
+                      <option key={index} value={item.code}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-12 col-md-12 cl-lg-4 col-xl-4">
+                  <select
+                    class="form-select"
+                    required
+                    onChange={(e) => setWardName(e.target.value + ", ")}
+                  >
+                    <option>-- Chọn Xã/Phường --</option>
+                    {ward.length > 0 &&
+                      ward.map((item, index) => (
+                        <option key={index} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="col-12 col-sm-12 col-md-12 cl-lg-4 col-xl-4">
+                  <span>Đà Nẵng</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                required
+                className="form-control"
+                onChange={(e) => setAddress(e.target.value + ", ")}
+                id="delivery"
+                placeholder="name@example.com"
+              />
+              <label for="delivery">Nhập nơi nhận...</label>
+            </div>
+            <div className="mb-2 fw-bold" id="address">
+              {address + wardName + districtName + " Đà Nẵng"}
+            </div>
+            </form>
+          </ModalReact>
         <Navbars />
 
         <div className="container shadow-sm bg-white p-3 mt-3 rounded-3 text-start">
@@ -615,6 +695,7 @@ export default function DetailProduct() {
                 <div className="row mt-2 p-2">
                   {products && products.length > 0 ? (
                     products.map((item) => (
+                      item.amount > 0 && (
                       <div
                         key={item.idProduct}
                         className="col-3 col-sm-3 col-md-4 col-lg-2 col-xl-2 mb-3"
@@ -660,6 +741,7 @@ export default function DetailProduct() {
                           </div>
                         </a>
                       </div>
+                      )
                     ))
                   ) : (
                     <div className="spinner-border text-danger" role="status">

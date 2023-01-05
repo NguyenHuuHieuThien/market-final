@@ -12,79 +12,57 @@ import {
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { axiosx as axios } from "../../Helper";
+import ModalReact from "../../component/Modal";
 export default function SellerManager() {
   let user = JSON.parse(localStorage.getItem("token"));
   const { enqueueSnackbar } = useSnackbar();
   const [orderList, setOrderList] = useState([]);
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkList, setCheckList] = useState([]);
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const [dataDetail, setDataDetail] = useState()
   const [data, setData] = useState(orderList.length > 0 ? orderList : [])
   // useEffect
   useEffect(() => {
-      axios
-        .get(`/bill/selectByUser/${user.id}?status=pending`)
-        .then((res) =>{
+    axios
+      .get(`/bill/selectByUser/${user.id}?status=pending`)
+      .then((res) => {
         console.log(res.data)
-          setOrderList(res.data)
-  })
-        .catch((err) => console.log(err));
+        setOrderList(res.data)
+      })
+      .catch((err) => console.log(err));
   }, [data]);
-  // const checkAll = () => {
-  //   setIsCheckAll(!isCheckAll);
-  //   if (!isCheckAll) {
-  //     setCheckList(orderList.map((item) => item.idProduct));
-  //   } else {
-  //     setCheckList([]);
-  //   }
-  // };
-  // check many bill
-//   const checked = (id) => {
-//     if(checkList.length ===0){
-//       setCheckList(checkList.push(id))
-//     }else{
-//       if(checkList.includes(id)){
-//         setCheckList(checkList.splice(checkList.indexOf(id),1))
-//       }else{
-//         setCheckList(checkList.push(id))
-//       }
-//     }
-//     orderList.map(item => {
-//       item.checked = checkList.includes(id)
-//       return item
-//     })
-// }
-  // accept many bill
   const accept = (id) => {
-    // let data = orderList.filter(item=> checkList.inculdes(item.idProduct))
     axios
       .put(`/bill/updateStatus/${id}?status=active`)
-      .then(() =>{
-        setData(data.filter(item=> item.idBill !== id))
+      .then(() => {
+        setData(data.filter(item => item.idBill !== id))
         enqueueSnackbar("Đã xác nhận giao hàng", { variant: "success" })
       })
       .catch(() =>
         enqueueSnackbar("Xác nhận giao hàng thất bại", { variant: "error" })
       );
   };
-  // delete many bill
-  // const deleteAll = () => {
-  //   console.log(checkList.toString());
-  //   axios
-  //     .put(`/product/deleteListProduct/${checkList}?status=deleted`)
-  //     .then(() =>
-  //       enqueueSnackbar("Xóa sản phẩm thành công", { variant: "success" })
-  //     )
-  //     .catch(() =>
-  //       enqueueSnackbar("Xóa sản phẩm thất bại", { variant: "error" })
-  //     );
-  // };
 
-// remove bill 
+  // detail bill
+  const detail = (id) => {
+    axios.get(`/bill/selectUserByIdBill/${id}`)
+    .then(res=> {
+      console.log(res.data)
+      setDataDetail(res.data)
+      handleShow()
+    })
+    .catch(err => console.log(err))
+  }
+
+  // remove bill 
   const remove = (id) => {
     axios
       .put(`/bill/updateStatus/${id}?status=deleted`)
-      .then(() =>{
-        setData(data.filter(item=> item.idBill !== id))
+      .then(() => {
+        setData(data.filter(item => item.idBill !== id))
         enqueueSnackbar("Đã bỏ đơn đặt của người mua", { variant: "success" })
       }
       )
@@ -95,32 +73,50 @@ export default function SellerManager() {
   return (
     <div>
       <BgUser>
+        <ModalReact
+          show={show}
+          title="Chi tiết đơn hàng"
+          handleClose={handleClose}
+          // handleFunction={order}
+          handleShow={handleShow}
+        >
+          <div>
+            <div>
+              <div>
+                <span className="me-5 fw-bold">Tên sản phẩm:</span>
+                <span>{dataDetail?.product.productName}</span>
+              </div>
+              <div>
+                <span  className="me-5 fw-bold">Tổng Giá:</span>
+                <span>{dataDetail?.totalPrice}</span>
+              </div>
+              <div>
+                <span className="me-5 fw-bold">Người đặt:</span>
+                <span>{dataDetail?.user.username}</span>
+              </div>
+              <div>
+                <span className="me-5 fw-bold">Số điện thoại:</span>
+                <span>{dataDetail?.user.phoneNumber}</span>
+              </div>
+              <div>
+                <span className="me-5 fw-bold">Ngày đặt:</span>
+                <span>{dataDetail?.createDate}</span>
+              </div>
+              <div>
+                <span className="me-5 fw-bold">Địa chỉ:</span>
+                <span>{dataDetail?.user.address}</span>
+              </div>
+            </div>
+          </div>
+        </ModalReact>
         <h1 className=" bg-white py-5 rounded-3 border-underline">
           Quản lý đơn hàng
         </h1>
-        <div className="col-6 d-flex">
-          <button
-            role="button"
-            // onClick={checkAll}
-            className={`border-0 me-1 py-1 text-white px-2 bg-success`}
-          >
-            <FontAwesomeIcon icon={faCheckDouble} className="mr-0" /> Chọn tất
-            cả
-          </button>
-          <button
-            role="button"
-            className={`border-0 me-1 py-1 text-white px-2 bg-danger`}
-            // onClick={deleteAll}
-          >
-            <FontAwesomeIcon icon={faTrash} className="mr-0" /> Xóa nhiều
-          </button>
-        </div>
         {/* table load data */}
         <div className="mt-3 bg-white rounded-3 shadow-sm">
           <Table striped bordered hover>
             <thead>
               <tr className="border-underline">
-                <th></th>
                 <th>Hình ảnh</th>
                 <th>Tên</th>
                 <th>Giá</th>
@@ -135,20 +131,12 @@ export default function SellerManager() {
               {orderList && orderList?.length > 0 ? (
                 orderList.map((item, index) => (
                   <tr key={index}>
-                    <td>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        // onChange={() => checked(item.product.idProduct)}
-                        // checked={item.checked}
-                      />
-                    </td>
                     <td className="col-1">
-                      <img src={item.product.urlFile[0] } alt="" width="100px" />
+                      <span onClick={()=> detail(item.idBill)}><img src={item.product.urlFile[0]} alt="" width="100px" /></span>
                     </td>
                     <td>
-                    <span className="limit-text">
-                    {item.product.productName}
+                      <span className="limit-text">
+                        {item.product.productName}
                       </span>
                     </td>
                     <td>{item.product.price}</td>
@@ -157,7 +145,7 @@ export default function SellerManager() {
                     {/* <td>{item.createDate}</td> */}
                     <td>
                       <span className="limit-text">
-                      {item.address}
+                        {item.address}
                       </span>
                     </td>
                     <td>
@@ -166,14 +154,14 @@ export default function SellerManager() {
                         onClick={() => accept(item.idBill)}
                         className="btn btn-sm btn-outline-success me-2"
                       >
-                        <FontAwesomeIcon icon={faCheck}/>
+                        <FontAwesomeIcon icon={faCheck} />
                       </button>
                       <button
                         type="button"
                         className="btn btn-sm btn-outline-danger"
                         onClick={() => remove(item.idBill)}
                       >
-                        <FontAwesomeIcon icon={faTrash}/>
+                        <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </td>
                   </tr>

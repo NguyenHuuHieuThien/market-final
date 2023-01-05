@@ -14,6 +14,8 @@ import {
   faRightFromBracket,
   faCheck,
   faClock,
+  faBars,
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
@@ -125,7 +127,7 @@ export default function Navbars() {
   const adminMenu = [
     {
       name: "Đi tới Admin",
-      icon: faUser,
+      icon: faBars,
       link: "/admin/users",
     },
     {
@@ -140,7 +142,7 @@ export default function Navbars() {
     },
     {
       name: "Quản lý tài khoản",
-      icon: faCheck,
+      icon: faUsers,
       link: "/admin/users",
     },
     {
@@ -377,6 +379,7 @@ export default function Navbars() {
                               <Link
                               to={item.link}
                               style={{ textDecoration: "none" }}
+                              onClick={item?.logout}
                             >
                               <div className="nav-profile-detail-item text-black py-2 text-start">
                                 <FontAwesomeIcon
